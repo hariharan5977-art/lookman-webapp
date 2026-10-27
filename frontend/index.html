@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="/lookman_logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lookman Distribution</title>
+    <script>
+      (function() {
+        function updateZoomPad() {
+          var innerW = window.innerWidth;
+          var outerW = window.outerWidth;
+          var zoomRatio = (outerW && innerW) ? (outerW / innerW) : 1;
+          var pad = 260;
+
+          if (innerW < 640) {
+            pad = 20;
+          } else if (innerW < 1024) {
+            pad = 32;
+          } else {
+            // At 100% zoom (ratio >= 0.96): full padding (260px on desktop)
+            var basePad = innerW >= 1366 ? 260 : Math.min(260, Math.max(36, Math.round((innerW - 840) / 2)));
+            if (zoomRatio >= 0.96) {
+              pad = basePad;
+            } else if (zoomRatio <= 0.28) {
+              // In the last 25% zoom (minimum browser zoom): no padding (0px)
+              pad = 0;
+            } else {
+              // Reduced step-by-step as you zoom out from 100% towards 25%
+              var progress = (zoomRatio - 0.28) / (0.96 - 0.28);
+              pad = Math.max(0, Math.round(basePad * progress));
+            }
+          }
+
+          document.documentElement.style.setProperty('--wide-pad-left', pad + 'px');
+          document.documentElement.style.setProperty('--wide-pad-right', pad + 'px');
+        }
+
+        updateZoomPad();
+        window.addEventListener('resize', updateZoomPad, { passive: true });
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', updateZoomPad, { passive: true });
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

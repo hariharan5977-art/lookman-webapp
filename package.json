@@ -1,0 +1,22 @@
+{
+  "name": "lookman-app",
+  "version": "1.0.0",
+  "description": "Lookman Distribution - Full Stack CCTV Solutions Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/server.js"
+  },
+  "keywords": [
+    "cctv",
+    "security",
+    "surveillance",
+    "lookman"
+  ],
+  "author": "Lookman",
+  "license": "ISC",
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}
