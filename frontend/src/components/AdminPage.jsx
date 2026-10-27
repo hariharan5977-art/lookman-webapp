@@ -73,6 +73,8 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
   const [editingRowIndex, setEditingRowIndex] = useState(null);
   const [editingProductModal, setEditingProductModal] = useState(null);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [inquiryToDelete, setInquiryToDelete] = useState(null);
+  const [deleteInquiryLoading, setDeleteInquiryLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isParsingModalPdf, setIsParsingModalPdf] = useState(false);
   const [modalPdfNotice, setModalPdfNotice] = useState('');
@@ -90,6 +92,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     let inqs = [];
     let prods = [];
     let backendDeleted = [];
+    let backendDeletedInquiries = [];
 
     // 1. Fetch from live API backend if online
     try {
@@ -100,7 +103,12 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       const inqData = await inqRes.json();
       const prodData = await prodRes.json();
 
-      if (inqData.success && inqData.inquiries) inqs = inqData.inquiries;
+      if (inqData.success && inqData.inquiries) {
+        inqs = inqData.inquiries;
+        if (inqData.deletedInquiryIds && Array.isArray(inqData.deletedInquiryIds)) {
+          backendDeletedInquiries = inqData.deletedInquiryIds;
+        }
+      }
       if (prodData.success && prodData.products) {
         prods = prodData.products;
         if (prodData.deletedProductIds && Array.isArray(prodData.deletedProductIds)) {
@@ -111,12 +119,21 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       // Backend offline on static host
     }
 
-    // Merge deleted tombstones
+    // Merge deleted product tombstones
     const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
     const allDeleted = [...new Set([...localDeleted, ...backendDeleted])];
     if (backendDeleted.length > 0) {
       localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(allDeleted));
     }
+
+    // Merge deleted inquiry tombstones
+    const localDeletedInqs = JSON.parse(localStorage.getItem('lookman_deleted_inquiry_ids') || '[]');
+    const allDeletedInqs = new Set([...localDeletedInqs, ...backendDeletedInquiries].map(String));
+    if (backendDeletedInquiries.length > 0) {
+      localStorage.setItem('lookman_deleted_inquiry_ids', JSON.stringify(Array.from(allDeletedInqs)));
+    }
+
+    const isDeletedInquiry = (inq) => inq && allDeletedInqs.has(String(inq.id));
 
     const isDeleted = (p) => {
       const pid = String(p.id || '').toLowerCase();
@@ -138,9 +155,11 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       return m.startsWith('SIP-') || m.startsWith('SHD-') || m.startsWith('SNVR-') || m.startsWith('SXVR-') || b === 'secura';
     };
 
-    // 2. Merge inquiries with local storage
+    // 2. Merge inquiries with local storage, strictly filtering out deleted inquiries
     const localInqs = JSON.parse(localStorage.getItem('lookman_inquiries') || '[]');
-    const mergedInquiries = [...inqs, ...localInqs.filter(li => !inqs.some(i => i.id === li.id))];
+    const cleanInqs = inqs.filter(i => !isDeletedInquiry(i));
+    const cleanLocalInqs = localInqs.filter(li => !isDeletedInquiry(li));
+    const mergedInquiries = [...cleanInqs, ...cleanLocalInqs.filter(li => !cleanInqs.some(i => String(i.id) === String(li.id)))];
 
     // 3. Merge products with custom products & all catalog products, strictly filtering out Secura & deleted items
     const rawCustom = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
@@ -1116,11 +1135,36 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     }
   };
 
-  const handleDeleteInquiry = (id) => {
+  const handleConfirmDeleteInquiry = async () => {
+    if (!inquiryToDelete) return;
+    const id = inquiryToDelete.id;
+    const idStr = String(id);
+    setDeleteInquiryLoading(true);
+
+    try {
+      await fetch(`${API_BASE}/inquiries/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn('Backend delete inquiry offline fallback:', e);
+    }
+
+    // 1. Update deleted tombstones in localStorage
+    const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_inquiry_ids') || '[]');
+    if (!localDeleted.includes(idStr)) {
+      localDeleted.push(idStr);
+      localStorage.setItem('lookman_deleted_inquiry_ids', JSON.stringify(localDeleted));
+    }
+
+    // 2. Remove from lookman_inquiries in localStorage
     const localInqs = JSON.parse(localStorage.getItem('lookman_inquiries') || '[]');
-    const filtered = localInqs.filter(inq => inq.id !== id);
-    localStorage.setItem('lookman_inquiries', JSON.stringify(filtered));
-    setInquiries(prev => prev.filter(inq => inq.id !== id));
+    const filteredLocal = localInqs.filter(inq => String(inq.id) !== idStr);
+    localStorage.setItem('lookman_inquiries', JSON.stringify(filteredLocal));
+
+    // 3. Remove from UI state
+    setInquiries(prev => prev.filter(inq => String(inq.id) !== idStr));
+    setInquiryToDelete(null);
+    setDeleteInquiryLoading(false);
   };
 
   // Filtered lists
@@ -1414,9 +1458,10 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                         Call Customer
                       </a>
                       <button 
-                        onClick={() => handleDeleteInquiry(inq.id)}
+                        type="button"
+                        onClick={() => setInquiryToDelete(inq)}
                         className="text-xs text-slate-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                        title="Delete Inquiry"
+                        title="Delete Quote Request"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -2587,6 +2632,43 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                 className="flex-1 py-2.5 px-4 rounded-xl bg-[#ea0004] hover:bg-[#6a0006] text-white font-heading font-bold text-xs shadow-md transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
               >
                 {isDeleting ? 'Deleting...' : 'Delete Product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── QUOTE REQUEST / INQUIRY DELETE CONFIRMATION MODAL ── */}
+      {inquiryToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 text-[#ea0004] border border-red-200 flex items-center justify-center mx-auto">
+              <Trash2 size={24} />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-heading font-black text-[#12182b]">
+                Delete Quote Request?
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to permanently delete the inquiry from <strong className="text-slate-800">{inquiryToDelete.name}</strong> ({inquiryToDelete.phone || inquiryToDelete.email}) from the database?
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setInquiryToDelete(null)}
+                disabled={deleteInquiryLoading}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-gray-200 text-slate-700 font-heading font-bold text-xs hover:bg-gray-50 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteInquiry}
+                disabled={deleteInquiryLoading}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-[#ea0004] hover:bg-[#6a0006] text-white font-heading font-bold text-xs shadow-md transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
+              >
+                {deleteInquiryLoading ? 'Deleting...' : 'Delete Inquiry'}
               </button>
             </div>
           </div>

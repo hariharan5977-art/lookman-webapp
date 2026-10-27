@@ -16,7 +16,13 @@ function writeDb(data) {
 // GET /api/inquiries - List all inquiries (Admin)
 router.get('/', (req, res) => {
   const db = readDb();
-  res.json({ success: true, inquiries: db.inquiries || [] });
+  db.inquiries = db.inquiries || [];
+  db.deletedInquiryIds = db.deletedInquiryIds || [];
+  res.json({ 
+    success: true, 
+    inquiries: db.inquiries,
+    deletedInquiryIds: db.deletedInquiryIds 
+  });
 });
 
 // POST /api/inquiries - Submit contact/quote inquiry
@@ -27,6 +33,9 @@ router.post('/', (req, res) => {
   }
 
   const db = readDb();
+  db.inquiries = db.inquiries || [];
+  db.deletedInquiryIds = db.deletedInquiryIds || [];
+
   const newInquiry = {
     id: Date.now(),
     name,
@@ -48,4 +57,54 @@ router.post('/', (req, res) => {
   });
 });
 
+// DELETE /api/inquiries/:id - Delete single inquiry permanently (Admin)
+router.delete('/:id', (req, res) => {
+  const db = readDb();
+  db.inquiries = db.inquiries || [];
+  db.deletedInquiryIds = db.deletedInquiryIds || [];
+  const param = String(req.params.id).trim();
+
+  const initialCount = db.inquiries.length;
+  db.inquiries = db.inquiries.filter(i => String(i.id) !== param);
+
+  if (!db.deletedInquiryIds.includes(param)) {
+    db.deletedInquiryIds.push(param);
+  }
+
+  writeDb(db);
+
+  res.json({
+    success: true,
+    message: 'Inquiry deleted successfully from database',
+    id: param,
+    deletedCount: initialCount - db.inquiries.length
+  });
+});
+
+// DELETE /api/inquiries - Bulk delete inquiries (Admin)
+router.delete('/', (req, res) => {
+  const db = readDb();
+  db.inquiries = db.inquiries || [];
+  db.deletedInquiryIds = db.deletedInquiryIds || [];
+  const { ids } = req.body || {};
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ success: false, message: 'Valid array of inquiry IDs is required' });
+  }
+
+  const idSet = new Set(ids.map(String));
+  const initialCount = db.inquiries.length;
+  db.inquiries = db.inquiries.filter(i => !idSet.has(String(i.id)));
+  db.deletedInquiryIds = [...new Set([...db.deletedInquiryIds, ...ids.map(String)])];
+
+  writeDb(db);
+
+  res.json({
+    success: true,
+    message: `Successfully deleted ${initialCount - db.inquiries.length} inquiries`,
+    deletedCount: initialCount - db.inquiries.length
+  });
+});
+
 module.exports = router;
+
