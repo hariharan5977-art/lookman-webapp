@@ -5,17 +5,19 @@
   "portsAttributes": {
     "5000": {
       "label": "Lookman Full-Stack Application",
-      "onAutoForward": "openPreview",
+      "onAutoForward": "openBrowser",
+      "visibility": "public",
       "requireLocalPort": false
     },
     "5173": {
       "label": "Vite Frontend Dev Server",
       "onAutoForward": "silent",
+      "visibility": "public",
       "requireLocalPort": false
     }
   },
   "postCreateCommand": "npm run install:all && npm run build",
-  "postStartCommand": "npm start",
+  "postStartCommand": "nohup npm start > /tmp/server.log 2>&1 &",
   "customizations": {
     "vscode": {
       "settings": {
