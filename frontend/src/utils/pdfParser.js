@@ -1,5 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { resolveProductCode, resolveProductName } from './productUtils';
 
 // Configure worker for browser runtime
 if (typeof window !== 'undefined' && pdfjsLib.GlobalWorkerOptions) {
@@ -690,11 +691,14 @@ export async function parsePdfDatasheet(file) {
       const specs = extractSpecsFromLines(p.lines, model);
       const oneLineTitle = findOneLineTitle(p.lines, model, category, specs.resolution);
       const imageToUse = p.pageImage || autoDetectProductImage(model, category);
+      const code = resolveProductCode({ model, title: oneLineTitle, description: specs.description, category });
+      const resolvedName = resolveProductName({ model, title: oneLineTitle });
 
       detectedProducts.push({
         id: `pdf_${Date.now()}_${idx}`,
-        model,
-        name: model,
+        model: code,
+        productCode: code,
+        name: resolvedName,
         title: oneLineTitle, // The one line of the image / product
         category,
         image: imageToUse, // Product image alone without background (transparent PNG)
@@ -706,7 +710,7 @@ export async function parsePdfDatasheet(file) {
         casing: specs.casing,
         description: specs.description,
         fullText: p.fullText, // All the text fetched from the page
-        rawImageGiven: p.pageImage ? `Transparent Product PNG (Page ${p.pageNum})` : `Lookman Render (${model})`,
+        rawImageGiven: p.pageImage ? `Transparent Product PNG (Page ${p.pageNum})` : `Lookman Render (${code})`,
         imageSource: p.pageImage ? 'pdf_transparent' : 'default_render',
         hasImage: Boolean(imageToUse),
         datasheetPdf: pdfBase64,
@@ -724,11 +728,14 @@ export async function parsePdfDatasheet(file) {
     const oneLineTitle = findOneLineTitle(combinedLines, model, category, specs.resolution);
     const primaryImage = pagesData[0]?.pageImage || '';
     const imageToUse = primaryImage || autoDetectProductImage(model, category);
+    const code = resolveProductCode({ model: model || fileNameBase, title: oneLineTitle, description: specs.description, category });
+    const resolvedName = resolveProductName({ model: model || fileNameBase, title: oneLineTitle });
 
     detectedProducts.push({
       id: `pdf_${Date.now()}_0`,
-      model: model || fileNameBase,
-      name: model || fileNameBase,
+      model: code,
+      productCode: code,
+      name: resolvedName,
       title: oneLineTitle, // The one line of the image / product
       category,
       image: imageToUse, // Product image alone without background (transparent PNG)
@@ -740,7 +747,7 @@ export async function parsePdfDatasheet(file) {
       casing: specs.casing,
       description: specs.description,
       fullText: combinedText, // All the text fetched from the PDF
-      rawImageGiven: primaryImage ? `${file.name} (Isolated Transparent Product)` : `Lookman Render (${model})`,
+      rawImageGiven: primaryImage ? `${file.name} (Isolated Transparent Product)` : `Lookman Render (${code})`,
       imageSource: primaryImage ? 'pdf_transparent' : 'default_render',
       hasImage: Boolean(imageToUse),
       datasheetPdf: pdfBase64,

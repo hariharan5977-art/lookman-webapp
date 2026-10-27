@@ -3,7 +3,15 @@ import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { parsePdfDatasheet } from '../utils/pdfParser';
 import { removeWhiteBackgroundFromImage } from '../utils/imageTransparency';
-import { resolveProductCode, resolveProductName } from '../utils/productUtils';
+import { 
+  resolveProductCode, 
+  resolveProductName, 
+  isDescriptiveText, 
+  extractGoogleDriveId, 
+  getGoogleDriveDirectDownloadUrl, 
+  getGoogleDriveViewUrl, 
+  downloadProductDatasheet 
+} from '../utils/productUtils';
 import { 
   Lock, 
   LogOut, 
@@ -24,7 +32,8 @@ import {
   FileText,
   Check,
   Download,
-  Edit
+  Edit,
+  ExternalLink
 } from './Icons';
 import { API_BASE } from '../api';
 import ALL_LOOKMAN_PRODUCTS from '../data/allProducts.json';
@@ -411,17 +420,150 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
         map[cleanKey] = String(row[k] !== undefined && row[k] !== null ? row[k] : '').trim();
       });
 
-      const model = map.model || map.modelno || map.modelnumber || map.productmodel || map.name || map.productname || map.item || map.itemcode || map.cameramodel || row['Model'] || row['model'] || '';
-      if (!model) return;
+      // 1. Dedicated Product Code extraction from all known column variations
+      const rawProductCode = (
+        map.productcode || 
+        map.code || 
+        map.itemcode || 
+        map.partno || 
+        map.partnumber || 
+        map.sku || 
+        map.modelcode || 
+        map.modelno || 
+        map.modelnumber || 
+        map.pn || 
+        map.cameracode || 
+        row['Product Code'] || 
+        row['product_code'] || 
+        row['ProductCode'] || 
+        row['Code'] || 
+        row['Item Code'] || 
+        row['ItemCode'] || 
+        row['Part No'] || 
+        row['Part Number'] || 
+        row['SKU'] || 
+        row['Model No'] || 
+        row['Model #'] || 
+        row['P/N'] || 
+        ''
+      ).trim();
+
+      // 2. Dedicated Camera / Product Name extraction from all known column variations
+      const rawProductName = (
+        map.productname || 
+        map.cameraname || 
+        map.name || 
+        map.title || 
+        map.producttitle || 
+        map.itemname || 
+        map.modelname || 
+        map.product || 
+        row['Product Name'] || 
+        row['ProductName'] || 
+        row['Camera Name'] || 
+        row['Name'] || 
+        row['Title'] || 
+        ''
+      ).trim();
+
+      // 3. Fallback Model field (which might be either a code or a name)
+      const rawModel = (
+        map.model || 
+        row['Model'] || 
+        row['model'] || 
+        row['MODEL'] || 
+        rawProductName || 
+        rawProductCode || 
+        ''
+      ).trim();
+
+      if (!rawModel && !rawProductName && !rawProductCode) return;
+
+      // 4. Resolve clean Camera Name and crisp hardware Product Code
+      let resolvedCode = '';
+      let resolvedName = '';
+
+      if (rawProductCode && !isDescriptiveText(rawProductCode)) {
+        resolvedCode = rawProductCode;
+      } else if (rawModel && !isDescriptiveText(rawModel)) {
+        resolvedCode = rawModel;
+      } else {
+        resolvedCode = resolveProductCode({
+          productCode: rawProductCode,
+          model: rawModel,
+          name: rawProductName,
+          description: map.description || '',
+          category: map.category || ''
+        });
+      }
+
+      if (rawProductName) {
+        resolvedName = resolveProductName({ name: rawProductName });
+      } else if (rawModel && isDescriptiveText(rawModel)) {
+        resolvedName = resolveProductName({ name: rawModel });
+      } else {
+        resolvedName = resolveProductName({ model: resolvedCode, name: rawModel });
+      }
+
+      const model = resolvedCode;
+      const name = resolvedName;
+
+      // 5. Extract Google Drive Link or Datasheet URL
+      let driveLink = (
+        map.drivelink || 
+        map.googledrivelink || 
+        map.googledrive || 
+        map.driveurl || 
+        map.googledriveurl || 
+        map.datasheetlink || 
+        map.datasheeturl || 
+        map.datasheet || 
+        map.datasheetpdf || 
+        map.pdflink || 
+        map.pdfurl || 
+        map.pdf || 
+        map.brochure || 
+        map.manual || 
+        map.documentlink || 
+        map.doclink || 
+        row['Drive Link'] || 
+        row['Google Drive Link'] || 
+        row['Google Drive'] || 
+        row['Drive URL'] || 
+        row['Datasheet Link'] || 
+        row['Datasheet URL'] || 
+        row['Datasheet'] || 
+        row['PDF Link'] || 
+        row['PDF URL'] || 
+        row['Datasheet PDF'] || 
+        row['PDF'] || 
+        ''
+      ).trim();
+
+      // Scan all row values for drive.google.com or .pdf URLs if not found in named column
+      if (!driveLink) {
+        for (const k of Object.keys(row)) {
+          const val = String(row[k] || '').trim();
+          if (val.includes('drive.google.com') || val.includes('docs.google.com') || val.toLowerCase().endsWith('.pdf') || val.toLowerCase().includes('.pdf?')) {
+            driveLink = val;
+            break;
+          }
+        }
+      }
+
+      let directDownloadLink = '';
+      if (driveLink) {
+        directDownloadLink = getGoogleDriveDirectDownloadUrl(driveLink);
+      }
 
       let category = map.category || map.productcategory || map.type || map.cctvtype || map.group || '';
       if (!category) {
-        const u = model.toUpperCase();
+        const u = `${model} ${name}`.toUpperCase();
         if (u.includes('VPS') || u.includes('PTZ')) category = 'PTZ Cameras';
         else if (u.includes('VD') || u.includes('DOME')) category = 'HD IP Camera';
         else if (u.includes('SNVR') || u.includes('NVR')) category = 'NVRS';
         else if (u.includes('XVR') || u.includes('DVR')) category = 'Hybrid DVR';
-        else if (u.includes('SHD')) category = 'HD Analog Cameras';
+        else if (u.includes('SHD') || u.includes('ANALOG')) category = 'HD Analog Cameras';
         else category = 'HD IP Camera';
       }
 
@@ -431,9 +573,9 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       const audio = map.audio || map.mic || map.microphone || map.twowayaudio || 'Built-in Mic & Audio Output';
       const power = map.power || map.poe || map.powersupply || map.voltage || 'PoE / 12V DC';
       const casing = map.casing || map.housing || map.ingress || map.iprating || map.weatherproof || 'IP66 Weatherproof Housing';
-      const description = map.description || map.features || map.keyfeatures || map.details || map.overview || `${model} high performance ${category} security camera with ${resolution} resolution.`;
+      const description = map.description || map.features || map.keyfeatures || map.details || map.overview || `${name} (${model}) high performance ${category} security camera with ${resolution} resolution.`;
 
-      // 1. Check all possible image column variations in the row
+      // 6. Check all possible image column variations in the row
       const rawImage = (
         map.image || 
         map.imageurl || 
@@ -504,7 +646,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
         }
       }
 
-      // Check if a companion image was uploaded named after the model
+      // Check if a companion image was uploaded named after the model or code
       if (!image) {
         const mKeyPng = model.toLowerCase().replace(/[^a-z0-9]/g, '') + '.png';
         const mKeyJpg = model.toLowerCase().replace(/[^a-z0-9]/g, '') + '.jpg';
@@ -520,7 +662,8 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       normalized.push({
         id: 'ds_preview_' + idx,
         model,
-        name: model,
+        productCode: model,
+        name,
         category,
         resolution,
         sensor,
@@ -533,6 +676,10 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
         image: image, // Strictly the exact image from datasheet or empty
         imageSource,
         hasImage: Boolean(image),
+        driveLink: driveLink,
+        datasheetPdf: directDownloadLink || driveLink,
+        datasheetPdfName: `${model}_datasheet.pdf`,
+        hasDatasheet: Boolean(driveLink || directDownloadLink),
         price: parseFloat(map.price || map.mrp || 0) || 0
       });
     });
@@ -626,14 +773,14 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
   };
 
   const handleDownloadSampleTemplate = () => {
-    const headers = ['Model', 'Category', 'Resolution', 'Sensor', 'Night Vision', 'Audio', 'Power', 'Casing', 'Description', 'Image'];
+    const headers = ['Product Name', 'Product Code', 'Category', 'Resolution', 'Sensor', 'Night Vision', 'Audio', 'Power', 'Casing', 'Description', 'Image', 'Drive Link'];
     const rows = [
-      ['SIP-VB402ADA', 'HD IP Camera', '4MP Super HD', '1/2.8" Progressive Scan CMOS', 'Smart IR 40m', 'Built-in Mic', 'PoE / 12V DC', 'IP67 Weatherproof Metal', 'Ultra high resolution AI bullet camera with smart motion analytics.', '/SIP-VB401ADA.png'],
-      ['SIP-VD402FDMA', 'HD IP Camera', '4MP Super HD', '1/2.8" CMOS', 'Color Night Vision 30m', 'Two-way Audio', 'PoE / 12V DC', 'IK10 Vandal-proof Dome', 'Vandal dome camera with facial recognition & intrusion alert.', '/SIP-VD401FDMA.png'],
-      ['SIP-VPS4032AI', 'PTZ Cameras', '4MP 32x Optical Zoom', '1/1.8" STARVIS CMOS', 'Laser IR 150m', 'Audio In/Out', 'PoE+ / 24V AC', 'IP67 Auto-tracking Dome', 'High speed PTZ camera with 360 degree endless rotation and ANPR.', '/SIP-VPS2032AI.png'],
-      ['SNVR-V0432AI', 'NVRS', '4K 32-Channel NVR', '-', '-', 'Audio In/Out', '220V AC', '1.5U Rackmount', '32-channel AI network video recorder with 4 SATA bays and smart playback.', '/SNVR-V0232AI.png'],
-      ['SHD-VD201LCM', 'HD Analog Cameras', '2MP 1080P', 'High Performance Sensor', 'Full Color Night Vision 20m', 'Built-in Audio Mic', '12V DC', 'IP66 Weatherproof', 'Full color day/night analog turret camera with built-in mic.', '/SHD-VD201LCM.png'],
-      ['SIP-VB841-PANA', 'HD IP Camera', '8MP 4K Ultra HD', 'Sony STARVIS Ultra Low Light', 'Smart IR 50m', 'Two-way Audio', 'PoE / 12V DC', 'IP67 Weatherproof Metal', '8MP Panoramic AI CCTV camera. Accepts full web URLs, asset paths, or filenames.', 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?w=600']
+      ['4MP Super HD AI Bullet Camera', 'SIP-VB402ADA', 'HD IP Camera', '4MP Super HD', '1/2.8" Progressive Scan CMOS', 'Smart IR 40m', 'Built-in Mic', 'PoE / 12V DC', 'IP67 Weatherproof Metal', 'Ultra high resolution AI bullet camera with smart motion analytics.', '/SIP-VB401ADA.png', 'https://drive.google.com/file/d/1exampleDriveIdForSIPVB402ADA/view?usp=sharing'],
+      ['4MP Color Night Vision Dome Camera', 'SIP-VD402FDMA', 'HD IP Camera', '4MP Super HD', '1/2.8" CMOS', 'Color Night Vision 30m', 'Two-way Audio', 'PoE / 12V DC', 'IK10 Vandal-proof Dome', 'Vandal dome camera with facial recognition & intrusion alert.', '/SIP-VD401FDMA.png', 'https://drive.google.com/file/d/1exampleDriveIdForSIPVD402FDMA/view?usp=sharing'],
+      ['2MP Full-Color HD Analog Bullet Camera', 'CO-H-2BFDML(V)', 'HD Analog Cameras', '2MP 1080P Full HD', '1/2.8" Progressive Scan CMOS', '24/7 Full Color 30m', 'Built-in Audio Mic', '12V DC', 'IP66 Weatherproof', 'Full color day/night analog bullet camera with built-in mic.', '/CO-H-2BFDML(V).png', 'https://drive.google.com/file/d/1exampleDriveIdForCOH2BFDML/view?usp=sharing'],
+      ['2MP Full-Color HD Analog Turret Camera', 'CO-H-2DFDML(V)', 'HD Analog Cameras', '2MP 1080P Full HD', '1/2.8" Progressive Scan CMOS', '24/7 Full Color 20m', 'Built-in Audio Mic', '12V DC', 'IP66 Weatherproof', 'Full color day/night analog turret camera with built-in mic.', '/CO-H-2DFDML(V).png', 'https://drive.google.com/file/d/1exampleDriveIdForCOH2DFDML/view?usp=sharing'],
+      ['4MP 32x Starlight PTZ Dome Camera', 'SIP-VPS4032AI', 'PTZ Cameras', '4MP 32x Optical Zoom', '1/1.8" STARVIS CMOS', 'Laser IR 150m', 'Audio In/Out', 'PoE+ / 24V AC', 'IP67 Auto-tracking Dome', 'High speed PTZ camera with 360 degree endless rotation and ANPR.', '/SIP-VPS2032AI.png', 'https://drive.google.com/file/d/1exampleDriveIdForPTZ4032/view?usp=sharing'],
+      ['32 Channel 4K AI NVR', 'SNVR-V0432AI', 'NVRS', '4K 32-Channel NVR', '-', '-', 'Audio In/Out', '220V AC', '1.5U Rackmount', '32-channel AI network video recorder with 4 SATA bays and smart playback.', '/SNVR-V0232AI.png', 'https://drive.google.com/file/d/1exampleDriveIdForNVR0432/view?usp=sharing']
     ];
 
     const csvContent = [
@@ -683,6 +830,8 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     const formattedProducts = parsedProducts.map((p, idx) => {
       const code = resolveProductCode(p);
       const name = resolveProductName(p);
+      const driveLink = p.driveLink || '';
+      const directDownload = driveLink ? getGoogleDriveDirectDownloadUrl(driveLink) : (p.datasheetPdf || '');
       return {
         id: 'prod_' + timestamp + '_' + idx,
         name: name,
@@ -695,8 +844,9 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
         description: p.description,
         fullText: p.fullText || '',
         image: p.image,
-        datasheetPdf: p.datasheetPdf || '',
-        datasheetPdfName: p.datasheetPdfName || '',
+        driveLink: driveLink,
+        datasheetPdf: directDownload || p.datasheetPdf || '',
+        datasheetPdfName: p.datasheetPdfName || `${code}_datasheet.pdf`,
         price: p.price || 0,
         specs: {
           resolution: p.resolution,
@@ -853,8 +1003,9 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       productCode: code,
       title: (editingProductModal.title || `${name} surveillance hardware from Lookman.`).trim(),
       fullText: editingProductModal.fullText || '',
-      datasheetPdf: editingProductModal.datasheetPdf || '',
-      datasheetPdfName: editingProductModal.datasheetPdfName || '',
+      driveLink: editingProductModal.driveLink || '',
+      datasheetPdf: editingProductModal.datasheetPdf || editingProductModal.driveLink || '',
+      datasheetPdfName: editingProductModal.datasheetPdfName || `${code}_datasheet.pdf`,
       specs: {
         resolution: editingProductModal.resolution,
         sensor: editingProductModal.sensor,
@@ -1793,20 +1944,29 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                                   <td className="py-2.5 px-3 font-bold text-[#12182b]">
                                     <div className="flex flex-col items-start gap-0.5">
                                       <div className="flex items-center gap-1.5">
-                                        <span>{p.name || p.model}</span>
+                                        <span>{resolveProductName(p)}</span>
                                         {isSelected && (
                                           <span className="w-1.5 h-1.5 rounded-full bg-[#ea0004]" />
                                         )}
                                       </div>
                                       <div className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
                                         <span className="uppercase text-[9px] font-bold text-slate-400">Code:</span>
-                                        <span className="text-[#ea0004] font-bold">{p.productCode || p.model}</span>
+                                        <span className="text-[#ea0004] font-bold">{resolveProductCode(p)}</span>
                                       </div>
-                                      {p.datasheetPdf && (
-                                        <span className="text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded flex items-center gap-1" title={p.datasheetPdfName || 'PDF Datasheet Attached'}>
+                                      {(p.datasheetPdf || p.driveLink) && (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            downloadProductDatasheet(p);
+                                          }}
+                                          className="text-[9.5px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors cursor-pointer mt-0.5"
+                                          title="Download & test attached PDF datasheet"
+                                        >
                                           <FileText size={10} className="text-rose-600" />
-                                          <span>PDF Datasheet</span>
-                                        </span>
+                                          <span>Drive Datasheet (Test)</span>
+                                          <Download size={9} className="opacity-70 ml-0.5" />
+                                        </button>
                                       )}
                                     </div>
                                   </td>
@@ -1896,15 +2056,26 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                             {parsedProducts[previewRowIndex].category}
                           </span>
 
-                          <h3 className="font-heading text-sm font-bold text-[#162653] tracking-tight mb-1 truncate" title={parsedProducts[previewRowIndex].name || parsedProducts[previewRowIndex].model}>
-                            {parsedProducts[previewRowIndex].name || parsedProducts[previewRowIndex].model}
+                          <h3 className="font-heading text-sm font-bold text-[#162653] tracking-tight mb-1 truncate" title={resolveProductName(parsedProducts[previewRowIndex])}>
+                            {resolveProductName(parsedProducts[previewRowIndex])}
                           </h3>
 
                           {/* Product Code (Shown directly BELOW the camera name) */}
                           <div className="text-[11px] font-mono font-bold text-slate-700 mb-2 truncate flex items-center justify-center gap-1.5 bg-slate-50 py-1 px-2.5 rounded-lg border border-slate-200/80">
                             <span className="text-[10px] uppercase font-bold text-slate-500 font-sans tracking-wide">Product Code:</span>
-                            <span className="text-[#ea0004] font-black">{parsedProducts[previewRowIndex].productCode || parsedProducts[previewRowIndex].model}</span>
+                            <span className="text-[#ea0004] font-black">{resolveProductCode(parsedProducts[previewRowIndex])}</span>
                           </div>
+
+                          {(parsedProducts[previewRowIndex].datasheetPdf || parsedProducts[previewRowIndex].driveLink) && (
+                            <button
+                              type="button"
+                              onClick={() => downloadProductDatasheet(parsedProducts[previewRowIndex])}
+                              className="w-full mb-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-heading text-[11px] font-bold py-1.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                            >
+                              <FileText size={12} className="text-rose-600" />
+                              <span>Download Datasheet (PDF)</span>
+                            </button>
+                          )}
 
                           {parsedProducts[previewRowIndex].title && (
                             <p className="text-[11px] font-semibold text-[#ea0004] line-clamp-1 mb-1 px-1 text-center" title={parsedProducts[previewRowIndex].title}>
@@ -1967,6 +2138,33 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                             </div>
                           </div>
 
+                          <div className="space-y-1 pt-1.5 border-t border-gray-200/60">
+                            <label className="text-[11px] text-slate-500 font-medium">Google Drive / Datasheet URL:</label>
+                            <input
+                              type="url"
+                              value={parsedProducts[previewRowIndex].driveLink || ''}
+                              onChange={(e) => {
+                                const url = e.target.value.trim();
+                                const direct = getGoogleDriveDirectDownloadUrl(url);
+                                setParsedProducts(prev => prev.map((p, i) => {
+                                  if (i === previewRowIndex) {
+                                    const code = resolveProductCode(p);
+                                    return {
+                                      ...p,
+                                      driveLink: url,
+                                      datasheetPdf: direct || url,
+                                      datasheetPdfName: `${code}_datasheet.pdf`,
+                                      hasDatasheet: Boolean(url)
+                                    };
+                                  }
+                                  return p;
+                                }));
+                              }}
+                              placeholder="https://drive.google.com/file/d/.../view"
+                              className="w-full bg-white border border-gray-200 text-[#12182b] text-[11px] px-2.5 py-1.5 rounded-lg outline-none focus:border-[#ea0004] font-mono"
+                            />
+                          </div>
+
                           {!parsedProducts[previewRowIndex].hasImage && (
                             <div className="pt-1">
                               <button
@@ -1992,26 +2190,30 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                           <div className="flex justify-between py-0.5"><span className="text-slate-500">Casing:</span> <span className="font-semibold text-slate-800">{parsedProducts[previewRowIndex].casing}</span></div>
                         </div>
 
-                        {/* Attached PDF Datasheet Box */}
-                        {parsedProducts[previewRowIndex].datasheetPdf && (
+                        {/* Attached PDF / Drive Datasheet Box */}
+                        {(parsedProducts[previewRowIndex].datasheetPdf || parsedProducts[previewRowIndex].driveLink) && (
                           <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 text-xs flex items-center justify-between gap-3 text-left">
                             <div className="flex items-center gap-2.5 min-w-0">
                               <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                                 <FileText size={16} />
                               </div>
                               <div className="min-w-0">
-                                <div className="font-bold text-rose-950 text-xs">PDF Datasheet Attached</div>
-                                <div className="text-[10px] text-rose-700 truncate">{parsedProducts[previewRowIndex].datasheetPdfName || 'datasheet.pdf'}</div>
+                                <div className="font-bold text-rose-950 text-xs">
+                                  {parsedProducts[previewRowIndex].driveLink?.includes('drive.google.com') ? 'Google Drive Datasheet' : 'PDF Datasheet Attached'}
+                                </div>
+                                <div className="text-[10px] text-rose-700 truncate" title={parsedProducts[previewRowIndex].driveLink || parsedProducts[previewRowIndex].datasheetPdfName}>
+                                  {parsedProducts[previewRowIndex].datasheetPdfName || `${resolveProductCode(parsedProducts[previewRowIndex])}_datasheet.pdf`}
+                                </div>
                               </div>
                             </div>
-                            <a
-                              href={parsedProducts[previewRowIndex].datasheetPdf}
-                              download={parsedProducts[previewRowIndex].datasheetPdfName || `${parsedProducts[previewRowIndex].model}_datasheet.pdf`}
-                              className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[10.5px] font-bold transition-colors shrink-0 shadow-xs flex items-center gap-1.5"
+                            <button
+                              type="button"
+                              onClick={() => downloadProductDatasheet(parsedProducts[previewRowIndex])}
+                              className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[10.5px] font-bold transition-colors shrink-0 shadow-xs flex items-center gap-1.5 cursor-pointer"
                             >
                               <Download size={11} />
-                              <span>View PDF</span>
-                            </a>
+                              <span>Test Download</span>
+                            </button>
                           </div>
                         )}
 
@@ -2304,12 +2506,32 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                   {editingProductModal.datasheetPdf && (
                     <button
                       type="button"
-                      onClick={() => setEditingProductModal(prev => ({ ...prev, datasheetPdf: '', datasheetPdfName: '' }))}
+                      onClick={() => setEditingProductModal(prev => ({ ...prev, datasheetPdf: '', datasheetPdfName: '', driveLink: '' }))}
                       className="text-xs text-red-600 hover:text-red-700 font-bold hover:underline cursor-pointer"
                     >
                       Remove
                     </button>
                   )}
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 space-y-1">
+                  <label className="block text-[11px] font-bold text-slate-700">Google Drive / Datasheet URL</label>
+                  <input
+                    type="url"
+                    value={editingProductModal.driveLink || ''}
+                    onChange={(e) => {
+                      const url = e.target.value.trim();
+                      const direct = getGoogleDriveDirectDownloadUrl(url);
+                      setEditingProductModal(prev => ({
+                        ...prev,
+                        driveLink: url,
+                        datasheetPdf: direct || url || prev.datasheetPdf
+                      }));
+                    }}
+                    placeholder="https://drive.google.com/file/d/.../view"
+                    className="w-full bg-white border border-gray-200 focus:border-[#ea0004] text-[#12182b] p-2 rounded-xl outline-none font-mono text-[11px]"
+                  />
+                  <p className="text-[10px] text-slate-400">Pastes directly from Google Drive sharing link; customers will get direct PDF download.</p>
                 </div>
               </div>
 

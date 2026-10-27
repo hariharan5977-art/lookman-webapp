@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, X, ChevronRight, ChevronDown, Eye, Shield, Check, Download, Share2 } from './Icons';
+import { Search, X, ChevronRight, ChevronDown, Eye, Shield, Check, Download, Share2, FileText } from './Icons';
 import ALL_LOOKMAN_PRODUCTS from '../data/allProducts.json';
-import { resolveProductCode, resolveProductName } from '../utils/productUtils';
+import { resolveProductCode, resolveProductName, downloadProductDatasheet } from '../utils/productUtils';
 import { removeWhiteBackgroundFromImage } from '../utils/imageTransparency';
 
 // ─── LOOKMAN OFFICIAL CATEGORIES & SUB-FILTERS TAXONOMY (TVT INDIA PATTERN) ───
@@ -783,17 +783,16 @@ export default function ProductCatalog({
                       <span>&gt;</span>
                     </button>
 
-                    {(selectedProductDetail.datasheetPdf || selectedProductDetail.pdf) && (
-                      <a
-                        href={selectedProductDetail.datasheetPdf || selectedProductDetail.pdf}
-                        download={selectedProductDetail.datasheetPdfName || `${selectedProductDetail.model}_datasheet.pdf`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    {(selectedProductDetail.datasheetPdf || selectedProductDetail.driveLink || selectedProductDetail.pdf) && (
+                      <button
+                        type="button"
+                        onClick={() => downloadProductDatasheet(selectedProductDetail)}
                         className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full shadow-2xs hover:shadow transition-all inline-flex items-center gap-2 cursor-pointer"
+                        title="Download official PDF datasheet"
                       >
                         <Download size={14} className="text-[#ea0004]" />
                         <span>Download Datasheet (PDF)</span>
-                      </a>
+                      </button>
                     )}
                   </div>
 
@@ -1035,6 +1034,46 @@ export default function ProductCatalog({
                   </div>
                 </div>
 
+                {/* Technical Datasheet & Documentation Section */}
+                <div className="pt-6 border-t border-slate-100 text-left">
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#ea0004]" />
+                      <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-[#101f46]">
+                        TECHNICAL DATASHEET &amp; DOCUMENTATION
+                      </h3>
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-500 font-mono">
+                      PDF SPECIFICATIONS
+                    </span>
+                  </div>
+
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-rose-50/70 to-slate-50 border border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-rose-100 text-[#ea0004] flex items-center justify-center shrink-0 shadow-2xs">
+                        <FileText size={24} />
+                      </div>
+                      <div>
+                        <h4 className="font-heading text-sm font-bold text-[#101f46]">
+                          {resolveProductName(selectedProductDetail)}
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Hardware Product Code: <strong className="text-[#ea0004] font-mono">{resolveProductCode(selectedProductDetail)}</strong> • Complete engineering specs, dimensions, and wiring schematics.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => downloadProductDatasheet(selectedProductDetail)}
+                      className="text-white font-heading text-xs sm:text-sm font-bold px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all cursor-pointer inline-flex items-center gap-2 shrink-0"
+                      style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
+                    >
+                      <Download size={14} />
+                      <span>Download Datasheet (PDF)</span>
+                    </button>
+                  </div>
+                </div>
+
               </div>
             ) : (
               /* ── STANDARD PRODUCTS GRID VIEW (CLEAN WHITE CARDS ON HERO BACKGROUND) ── */
@@ -1123,17 +1162,33 @@ export default function ProductCatalog({
                           <span className="text-[11px] font-mono font-black text-[#ea0004] tracking-tight">{resolveProductCode(product)}</span>
                         </div>
 
-                        {/* View Details Button */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenDetailView(product);
-                          }}
-                          className="text-white font-heading text-[11px] sm:text-xs font-semibold px-4 py-2 sm:py-2.5 rounded-full shadow-xs hover:shadow-md hover:opacity-95 transition-all duration-150 cursor-pointer w-full shrink-0"
-                          style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
-                        >
-                          View Details
-                        </button>
+                        {/* Action Buttons: View Details & 1-Click Datasheet Download */}
+                        <div className="flex items-center gap-1.5 w-full shrink-0">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDetailView(product);
+                            }}
+                            className="flex-1 text-white font-heading text-[11px] sm:text-xs font-semibold px-3 py-2 sm:py-2.5 rounded-full shadow-xs hover:shadow-md hover:opacity-95 transition-all duration-150 cursor-pointer"
+                            style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
+                          >
+                            View Details
+                          </button>
+                          {(product.datasheetPdf || product.driveLink || product.pdf) && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadProductDatasheet(product);
+                              }}
+                              title={`Download ${resolveProductCode(product)} Datasheet (PDF)`}
+                              aria-label={`Download ${resolveProductCode(product)} Datasheet`}
+                              className="w-8 h-8 rounded-full bg-rose-50 hover:bg-rose-100 text-[#ea0004] border border-rose-200 flex items-center justify-center shrink-0 transition-colors shadow-2xs cursor-pointer"
+                            >
+                              <FileText size={14} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

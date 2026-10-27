@@ -62,6 +62,29 @@ router.get('/categories', (req, res) => {
   });
 });
 
+// GET /api/products/datasheet-download - Direct download proxy/redirect for Google Drive & PDF datasheets
+router.get('/datasheet-download', (req, res) => {
+  const rawUrl = (req.query.url || '').trim();
+  const filename = (req.query.filename || 'lookman_datasheet.pdf').trim();
+
+  if (!rawUrl) {
+    return res.status(400).json({ success: false, message: 'url query parameter is required' });
+  }
+
+  // Detect Google Drive link and convert to direct export URL
+  const driveMatch = rawUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+                     rawUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+                     rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+
+  if (driveMatch && driveMatch[1]) {
+    const fileId = driveMatch[1];
+    const directUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    return res.redirect(302, directUrl);
+  }
+
+  return res.redirect(302, rawUrl);
+});
+
 // GET /api/products/:id - Single product by ID or Slug
 router.get('/:id', (req, res) => {
   const db = readDb();
@@ -86,11 +109,13 @@ router.post('/', (req, res) => {
     return res.status(400).json({ success: false, message: 'Name and category are required' });
   }
 
+  const modelCode = (req.body.productCode || req.body.model || name).trim();
   const newProduct = {
     id: Date.now(),
     name,
-    model: req.body.model || name,
-    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    model: modelCode,
+    productCode: modelCode,
+    slug: modelCode.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     category,
     categories: [category],
     price: parseFloat(price) || 0,
@@ -99,8 +124,9 @@ router.post('/', (req, res) => {
     title: req.body.title || `${name} high-definition surveillance camera.`,
     description: description || `${name} high-definition surveillance camera.`,
     fullText: req.body.fullText || '',
-    datasheetPdf: req.body.datasheetPdf || '',
-    datasheetPdfName: req.body.datasheetPdfName || '',
+    driveLink: req.body.driveLink || '',
+    datasheetPdf: req.body.datasheetPdf || req.body.driveLink || '',
+    datasheetPdfName: req.body.datasheetPdfName || `${modelCode}_datasheet.pdf`,
     keyFeatures: req.body.keyFeatures || [],
     functions: req.body.functions || {},
     specs: specs || {
@@ -135,13 +161,15 @@ router.post('/bulk', (req, res) => {
 
   const normalizedList = incomingProducts.map((p, idx) => {
     const name = (p.name || p.model || `Product-${idx + 1}`).trim();
+    const model = (p.productCode || p.model || name).trim();
     const category = p.category || 'HD Analog Cameras';
     return {
       id: p.id || (Date.now() + idx),
       name,
-      model: p.model || name,
+      model,
+      productCode: model,
       brand: p.brand || 'Color On',
-      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      slug: (p.slug || model || name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       category,
       categories: Array.isArray(p.categories) ? p.categories : [category],
       price: parseFloat(p.price) || 0,
@@ -149,8 +177,9 @@ router.post('/bulk', (req, res) => {
       title: p.title || `${name} high-definition surveillance camera.`,
       description: p.description || `${name} high-definition surveillance camera.`,
       fullText: p.fullText || '',
-      datasheetPdf: p.datasheetPdf || '',
-      datasheetPdfName: p.datasheetPdfName || '',
+      driveLink: p.driveLink || '',
+      datasheetPdf: p.datasheetPdf || p.driveLink || '',
+      datasheetPdfName: p.datasheetPdfName || `${model}_datasheet.pdf`,
       keyFeatures: p.keyFeatures || [],
       functions: p.functions || {},
       specs: p.specs || {
@@ -227,12 +256,17 @@ router.put('/:id', (req, res) => {
   }
 
   const current = db.products[index];
+  const modelCode = (updates.productCode || updates.model || current.productCode || current.model || current.name).trim();
   const updatedProduct = {
     ...current,
     ...updates,
     id: current.id,
-    name: updates.name || updates.model || current.name,
-    model: updates.model || updates.name || current.model,
+    name: updates.name || current.name,
+    model: modelCode,
+    productCode: modelCode,
+    driveLink: updates.driveLink !== undefined ? updates.driveLink : (current.driveLink || ''),
+    datasheetPdf: updates.datasheetPdf !== undefined ? updates.datasheetPdf : (current.datasheetPdf || ''),
+    datasheetPdfName: updates.datasheetPdfName !== undefined ? updates.datasheetPdfName : (current.datasheetPdfName || `${modelCode}_datasheet.pdf`),
     specs: {
       ...(current.specs || {}),
       ...(updates.specs || {})

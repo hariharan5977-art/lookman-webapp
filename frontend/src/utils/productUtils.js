@@ -33,10 +33,22 @@ export function isDescriptiveText(str) {
 export function resolveProductCode(p) {
   if (!p) return 'CO-H-2DFDML(V)';
 
-  // 1. Check if p.productCode is already a valid non-descriptive hardware code
-  const rawCode = (p.productCode || '').trim();
-  if (rawCode && !isDescriptiveText(rawCode)) {
-    return rawCode;
+  // 1. Check if dedicated code property is already provided and valid
+  const explicitCodes = [
+    p.productCode,
+    p.code,
+    p.itemCode,
+    p.partNo,
+    p.partNumber,
+    p.sku,
+    p.modelNo,
+    p.cameracode
+  ];
+  for (const c of explicitCodes) {
+    const trimmed = String(c || '').trim();
+    if (trimmed && !isDescriptiveText(trimmed)) {
+      return trimmed;
+    }
   }
 
   // 2. Check if p.model is a valid non-descriptive hardware code
@@ -52,7 +64,7 @@ export function resolveProductCode(p) {
   }
 
   // 4. Search for authentic model patterns anywhere in the product metadata
-  const pool = `${p.productCode || ''} ${p.model || ''} ${p.name || ''} ${p.title || ''} ${p.id || ''} ${p.description || ''} ${p.image || ''}`;
+  const pool = `${p.productCode || ''} ${p.code || ''} ${p.model || ''} ${p.name || ''} ${p.title || ''} ${p.id || ''} ${p.description || ''} ${p.image || ''}`;
   
   // Explicit Color On regex: CO-H-..., CO-IP-..., CO-PTZ-..., CO-NVR-..., CO-XVR-..., CO-SW-...
   const coMatch = pool.match(/\b(CO-[A-Za-z0-9\-_()]+)\b/i);
@@ -61,7 +73,7 @@ export function resolveProductCode(p) {
   }
 
   // Generic surveillance model pattern: e.g. IPC-..., DS-..., HAC-..., LM-...
-  const genericMatch = pool.match(/\b([A-Z]{2,4}-[A-Z0-9\-_()]{4,18})\b/i);
+  const genericMatch = pool.match(/\b([A-Z]{2,4}-[A-Z0-9\-_()]{3,18})\b/i);
   if (genericMatch && genericMatch[1] && !isDescriptiveText(genericMatch[1])) {
     return genericMatch[1].toUpperCase();
   }
@@ -70,12 +82,12 @@ export function resolveProductCode(p) {
   const textUpper = pool.toUpperCase();
 
   // 2MP Full-Color HD Analog Turret Camera
-  if ((textUpper.includes('TURRET') || textUpper.includes('DOME')) && (textUpper.includes('ANALOG') || textUpper.includes('HD')) && (textUpper.includes('2MP') || textUpper.includes('1080P'))) {
+  if ((textUpper.includes('TURRET') || textUpper.includes('DOME')) && (textUpper.includes('ANALOG') || textUpper.includes('HD') || textUpper.includes('AHD') || textUpper.includes('TVI')) && (textUpper.includes('2MP') || textUpper.includes('1080P'))) {
     return 'CO-H-2DFDML(V)';
   }
 
   // 2MP Full-Color HD Analog Bullet Camera
-  if (textUpper.includes('BULLET') && (textUpper.includes('ANALOG') || textUpper.includes('HD')) && (textUpper.includes('2MP') || textUpper.includes('1080P'))) {
+  if (textUpper.includes('BULLET') && (textUpper.includes('ANALOG') || textUpper.includes('HD') || textUpper.includes('AHD') || textUpper.includes('TVI')) && (textUpper.includes('2MP') || textUpper.includes('1080P'))) {
     return 'CO-H-2BFDML(V)';
   }
 
@@ -162,3 +174,108 @@ export function resolveProductName(p) {
 
   return clean || 'Color On 24/7 Surveillance Camera';
 }
+
+/**
+ * Extracts Google Drive file ID from any Google Drive sharing / preview / direct link
+ * @param {string} url - Google Drive URL
+ * @returns {string|null} The alphanumeric file ID
+ */
+export function extractGoogleDriveId(url) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  const match = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+                trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+                trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Converts any Google Drive link to a direct file download link
+ * @param {string} url - Original URL
+ * @returns {string} Direct download URL or original URL
+ */
+export function getGoogleDriveDirectDownloadUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  const fileId = extractGoogleDriveId(trimmed);
+  if (fileId) {
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  }
+  return trimmed;
+}
+
+/**
+ * Converts any Google Drive link to a standard document viewer link
+ * @param {string} url - Original URL
+ * @returns {string} View URL or original URL
+ */
+export function getGoogleDriveViewUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  const fileId = extractGoogleDriveId(trimmed);
+  if (fileId) {
+    return `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+  }
+  return trimmed;
+}
+
+/**
+ * Resolves the primary datasheet URL for a product
+ * @param {Object} product - Product record
+ * @returns {string} Datasheet direct download or view URL
+ */
+export function resolveDatasheetDownloadUrl(product) {
+  if (!product) return '';
+  const candidate = (
+    product.datasheetPdf ||
+    product.driveLink ||
+    product.pdf ||
+    product.datasheetUrl ||
+    product.datasheet ||
+    ''
+  ).trim();
+
+  if (!candidate) return '';
+  return getGoogleDriveDirectDownloadUrl(candidate);
+}
+
+/**
+ * Downloads a product datasheet directly to user's device.
+ * Supports Google Drive links, Base64 data URIs, local PDF paths, and remote URLs.
+ * @param {Object} product - Product object
+ * @returns {boolean} Success status
+ */
+export function downloadProductDatasheet(product) {
+  if (!product) return false;
+  const rawUrl = (
+    product.datasheetPdf ||
+    product.driveLink ||
+    product.pdf ||
+    product.datasheetUrl ||
+    product.datasheet ||
+    ''
+  ).trim();
+
+  if (!rawUrl) return false;
+
+  const code = resolveProductCode(product);
+  const fileName = product.datasheetPdfName || `${code}_datasheet.pdf`;
+  const directUrl = getGoogleDriveDirectDownloadUrl(rawUrl);
+
+  try {
+    const link = document.createElement('a');
+    link.href = directUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return true;
+  } catch (err) {
+    console.warn('Direct download link trigger failed, opening in new tab:', err);
+    window.open(directUrl, '_blank', 'noopener,noreferrer');
+    return true;
+  }
+}
+
