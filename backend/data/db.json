@@ -725,56 +725,6 @@
   ],
   "inquiries": [
     {
-      "id": 1793104163389,
-      "name": "<script>alert(\"XSS\")</script><img src=x onerror=alert(1)>",
-      "email": "xss.1793104162433@test.com",
-      "phone": "9840012345",
-      "company": "Direct Contact",
-      "solution": "Commercial CCTV Architecture",
-      "message": "<script>alert(\"XSS\")</script><img src=x onerror=alert(1)>",
-      "createdAt": "2026-10-27T12:29:23.389Z"
-    },
-    {
-      "id": 1793104161729,
-      "name": "QA Ramesh 1793104161439",
-      "email": "qa.1793104161439@lookmantest.com",
-      "phone": "9841022204",
-      "company": "Customer from Chennai CIT Nagar",
-      "solution": "Commercial CCTV Architecture",
-      "message": "[QA-AUTO-TEST] Verified contact inquiry payload. Timestamp: 1793104161439",
-      "createdAt": "2026-10-27T12:29:21.729Z"
-    },
-    {
-      "id": 1793103420939,
-      "name": "QA Ramesh 1793103420650",
-      "email": "qa.1793103420650@lookmantest.com",
-      "phone": "9841022204",
-      "company": "Customer from Chennai CIT Nagar",
-      "solution": "Commercial CCTV Architecture",
-      "message": "[QA-AUTO-TEST] Verified contact inquiry payload. Timestamp: 1793103420650",
-      "createdAt": "2026-10-27T12:17:00.939Z"
-    },
-    {
-      "id": 1793082914377,
-      "name": "<script>alert(\"XSS\")</script><img src=x onerror=alert(1)>",
-      "email": "xss.1793082913447@test.com",
-      "phone": "9840012345",
-      "company": "Direct Contact",
-      "solution": "Commercial CCTV Architecture",
-      "message": "<script>alert(\"XSS\")</script><img src=x onerror=alert(1)>",
-      "createdAt": "2026-10-27T06:35:14.377Z"
-    },
-    {
-      "id": 1793082912759,
-      "name": "QA Ramesh 1793082912495",
-      "email": "qa.1793082912495@lookmantest.com",
-      "phone": "9841022204",
-      "company": "Customer from Chennai CIT Nagar",
-      "solution": "Commercial CCTV Architecture",
-      "message": "[QA-AUTO-TEST] Verified contact inquiry payload. Timestamp: 1793082912495",
-      "createdAt": "2026-10-27T06:35:12.759Z"
-    },
-    {
       "id": 1,
       "name": "Ramesh Kumar",
       "email": "ramesh@example.com",
@@ -785,12 +735,6 @@
       "createdAt": "2026-08-22T08:52:18.991Z"
     }
   ],
-  "deletedProductIds": [
-    "CO-H-2BFDML(V)",
-    "co-h-2bfdml(v)",
-    "2mp full-color hd analog bullet camera"
-  ],
-  "deletedInquiryIds": [
-    "1793103422570"
-  ]
+  "deletedProductIds": [],
+  "deletedInquiryIds": []
 }

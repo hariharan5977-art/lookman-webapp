@@ -1903,7 +1903,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                           <tr>
                             <th className="py-3 px-3">#</th>
                             <th className="py-3 px-3">Image</th>
-                            <th className="py-3 px-3">Model</th>
+                            <th className="py-3 px-3">Camera &amp; Model Code</th>
                             <th className="py-3 px-3">Category</th>
                             <th className="py-3 px-3">Resolution</th>
                             <th className="py-3 px-3">Description</th>
@@ -1912,7 +1912,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {parsedProducts
-                            .filter(p => !datasheetSearch || p.model.toLowerCase().includes(datasheetSearch.toLowerCase()) || p.description.toLowerCase().includes(datasheetSearch.toLowerCase()))
+                            .filter(p => !datasheetSearch || p.model.toLowerCase().includes(datasheetSearch.toLowerCase()) || (p.name && p.name.toLowerCase().includes(datasheetSearch.toLowerCase())) || p.description.toLowerCase().includes(datasheetSearch.toLowerCase()))
                             .map((p, idx) => {
                               const isSelected = previewRowIndex === idx;
                               return (

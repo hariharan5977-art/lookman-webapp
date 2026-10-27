@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="lookman-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ea0004" />
+      <stop offset="100%" stop-color="#6a0006" />
+    </linearGradient>
+  </defs>
+  <!-- Subtle shadow -->
+  <path
+    d="M 2 2 L 2 22 L 7 17 L 11.5 26.5 L 14.5 25 L 10 15.5 L 17.5 15.5 Z"
+    fill="rgba(0,0,0,0.25)"
+    transform="translate(1, 1.5)"
+  />
+  <!-- Classic Arrow with Lookman Double Shade Outline -->
+  <path
+    d="M 2 2 L 2 22 L 7 17 L 11.5 26.5 L 14.5 25 L 10 15.5 L 17.5 15.5 Z"
+    fill="#ffffff"
+    stroke="url(#lookman-grad)"
+    stroke-width="1.75"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+</svg>

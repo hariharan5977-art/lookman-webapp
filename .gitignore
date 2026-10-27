@@ -3,8 +3,8 @@ node_modules/
 backend/node_modules/
 frontend/node_modules/
 
-# Production build output
-frontend/dist/
+# Production build output (committed to ensure instant deployment & GitHub Codespaces zero-build availability)
+# frontend/dist/
 
 # Environment variables
 .env

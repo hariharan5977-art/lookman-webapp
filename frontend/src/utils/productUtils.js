@@ -11,12 +11,15 @@
 export function isDescriptiveText(str) {
   if (!str || typeof str !== 'string') return false;
   const s = str.trim();
-  if (s.length > 28) return true;
+  if (s.length > 25) return true;
   // Multiple spaces indicate a sentence/title
   const words = s.split(/\s+/).filter(Boolean);
   if (words.length >= 3) return true;
+  if (words.length >= 2 && /(?:2mp|3mp|4mp|5mp|6mp|8mp|1080p|1080|4k|hd|color|ultra|pro|ai|smart|outdoor|indoor)/i.test(s)) {
+    return true;
+  }
   // Descriptive words used in camera names
-  if (/(?:camera|analog|turret|bullet|full-?color|audio|active|deterrence|channel|switch|recorder|starlight|surveillance|series|dome)/i.test(s)) {
+  if (/(?:camera|cctv|analog|turret|bullet|full-?color|audio|active|deterrence|channel|switch|recorder|starlight|surveillance|series|dome|eyeball|panoramic|wireless|optical)/i.test(s)) {
     // If it's a short alphanumeric code like "CO-IP-401FDA", it won't match those words
     return true;
   }
@@ -82,18 +85,36 @@ export function resolveProductCode(p) {
   const textUpper = pool.toUpperCase();
 
   // 2MP Full-Color HD Analog Turret Camera
-  if ((textUpper.includes('TURRET') || textUpper.includes('DOME')) && (textUpper.includes('ANALOG') || textUpper.includes('HD') || textUpper.includes('AHD') || textUpper.includes('TVI')) && (textUpper.includes('2MP') || textUpper.includes('1080P'))) {
+  if ((textUpper.includes('TURRET') || textUpper.includes('DOME') || textUpper.includes('EYEBALL')) && (textUpper.includes('ANALOG') || textUpper.includes('HD') || textUpper.includes('AHD') || textUpper.includes('TVI')) && (textUpper.includes('2MP') || textUpper.includes('1080P') || textUpper.includes('1080'))) {
     return 'CO-H-2DFDML(V)';
   }
 
   // 2MP Full-Color HD Analog Bullet Camera
-  if (textUpper.includes('BULLET') && (textUpper.includes('ANALOG') || textUpper.includes('HD') || textUpper.includes('AHD') || textUpper.includes('TVI')) && (textUpper.includes('2MP') || textUpper.includes('1080P'))) {
+  if (textUpper.includes('BULLET') && (textUpper.includes('ANALOG') || textUpper.includes('HD') || textUpper.includes('AHD') || textUpper.includes('TVI')) && (textUpper.includes('2MP') || textUpper.includes('1080P') || textUpper.includes('1080'))) {
     return 'CO-H-2BFDML(V)';
+  }
+
+  // 5MP Full-Color HD Analog Bullet Camera
+  if (textUpper.includes('BULLET') && (textUpper.includes('5MP') || textUpper.includes('5-MEGAPIXEL'))) {
+    return 'CO-H-5BFDML';
+  }
+
+  // 5MP Full-Color HD Analog Turret Camera
+  if ((textUpper.includes('TURRET') || textUpper.includes('DOME')) && (textUpper.includes('5MP') || textUpper.includes('5-MEGAPIXEL'))) {
+    return 'CO-H-5DFDML';
   }
 
   // 4MP Full-Color AI Active Deterrence IP Bullet Camera
   if (textUpper.includes('4MP') && (textUpper.includes('DETERRENCE') || textUpper.includes('ACTIVE') || textUpper.includes('401FDA') || textUpper.includes('EXACT_USER'))) {
     return 'CO-IP-401FDA';
+  }
+
+  // 4MP IP Cameras
+  if (textUpper.includes('4MP') && textUpper.includes('BULLET')) {
+    return 'CO-IP-401FDA';
+  }
+  if (textUpper.includes('4MP') && (textUpper.includes('TURRET') || textUpper.includes('DOME'))) {
+    return 'CO-IP-401FDMA';
   }
 
   // 2MP Full-Color Audio IP Turret Camera
@@ -128,7 +149,7 @@ export function resolveProductCode(p) {
   }
 
   // Fallback by form-factor
-  if (textUpper.includes('TURRET') || textUpper.includes('DOME')) {
+  if (textUpper.includes('TURRET') || textUpper.includes('DOME') || textUpper.includes('EYEBALL')) {
     return 'CO-H-2DFDML(V)';
   }
 
