@@ -1,0 +1,26 @@
+{
+  "name": "Lookman Distribution Full-Stack App",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bullseye",
+  "forwardPorts": [5000, 5173],
+  "portsAttributes": {
+    "5000": {
+      "label": "Lookman Full-Stack Application",
+      "onAutoForward": "openPreview",
+      "requireLocalPort": false
+    },
+    "5173": {
+      "label": "Vite Frontend Dev Server",
+      "onAutoForward": "silent",
+      "requireLocalPort": false
+    }
+  },
+  "postCreateCommand": "npm run install:all && npm run build",
+  "postStartCommand": "npm start",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}
