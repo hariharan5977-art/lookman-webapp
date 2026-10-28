@@ -1466,7 +1466,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                       </div>
 
                       {inq.message && (
-                        <div className="bg-white p-3 rounded-xl border border-gray-200 text-slate-700 text-xs leading-relaxed italic">
+                        <div className="bg-white p-3 rounded-xl border border-gray-200 text-slate-700 text-xs leading-relaxed italic whitespace-pre-line">
                           "{inq.message}"
                         </div>
                       )}
