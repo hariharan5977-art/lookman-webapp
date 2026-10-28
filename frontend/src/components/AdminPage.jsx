@@ -133,7 +133,16 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       localStorage.setItem('lookman_deleted_inquiry_ids', JSON.stringify(Array.from(allDeletedInqs)));
     }
 
-    const isDeletedInquiry = (inq) => inq && allDeletedInqs.has(String(inq.id));
+    const isDeletedInquiry = (inq) => {
+      if (!inq) return false;
+      const iId = String(inq.id || '').toLowerCase().trim();
+      const iPhone = String(inq.phone || '').trim();
+      const iEmail = String(inq.email || '').toLowerCase().trim();
+      return Array.from(allDeletedInqs).some(d => {
+        const dl = String(d).toLowerCase().trim();
+        return dl === iId || (iPhone && dl === iPhone) || (iEmail && dl === iEmail);
+      });
+    };
 
     const isDeleted = (p) => {
       const pid = String(p.id || '').toLowerCase();
@@ -1139,6 +1148,8 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     if (!inquiryToDelete) return;
     const id = inquiryToDelete.id;
     const idStr = String(id);
+    const phone = inquiryToDelete.phone ? String(inquiryToDelete.phone).trim() : '';
+    const email = inquiryToDelete.email ? String(inquiryToDelete.email).trim().toLowerCase() : '';
     setDeleteInquiryLoading(true);
 
     try {
@@ -1151,18 +1162,29 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
 
     // 1. Update deleted tombstones in localStorage
     const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_inquiry_ids') || '[]');
-    if (!localDeleted.includes(idStr)) {
-      localDeleted.push(idStr);
-      localStorage.setItem('lookman_deleted_inquiry_ids', JSON.stringify(localDeleted));
-    }
+    const toAdd = [idStr, phone, email].filter(Boolean);
+    toAdd.forEach(item => {
+      if (!localDeleted.includes(item)) localDeleted.push(item);
+    });
+    localStorage.setItem('lookman_deleted_inquiry_ids', JSON.stringify(localDeleted));
 
     // 2. Remove from lookman_inquiries in localStorage
     const localInqs = JSON.parse(localStorage.getItem('lookman_inquiries') || '[]');
-    const filteredLocal = localInqs.filter(inq => String(inq.id) !== idStr);
+    const filteredLocal = localInqs.filter(inq => {
+      if (String(inq.id) === idStr) return false;
+      if (phone && inq.phone === phone) return false;
+      if (email && inq.email && inq.email.toLowerCase() === email) return false;
+      return true;
+    });
     localStorage.setItem('lookman_inquiries', JSON.stringify(filteredLocal));
 
     // 3. Remove from UI state
-    setInquiries(prev => prev.filter(inq => String(inq.id) !== idStr));
+    setInquiries(prev => prev.filter(inq => {
+      if (String(inq.id) === idStr) return false;
+      if (phone && inq.phone === phone) return false;
+      if (email && inq.email && inq.email.toLowerCase() === email) return false;
+      return true;
+    }));
     setInquiryToDelete(null);
     setDeleteInquiryLoading(false);
   };

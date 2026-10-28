@@ -723,18 +723,7 @@
       "productCode": "CO-SW-0802POE"
     }
   ],
-  "inquiries": [
-    {
-      "id": 1,
-      "name": "Ramesh Kumar",
-      "email": "ramesh@example.com",
-      "phone": "+91 9876543210",
-      "company": "Apex Retail Solutions",
-      "solution": "Chain Store",
-      "message": "Looking for 15 IP camera units and 16-channel NVR setup for our Chennai retail stores.",
-      "createdAt": "2026-08-22T08:52:18.991Z"
-    }
-  ],
+  "inquiries": [],
   "deletedProductIds": [],
-  "deletedInquiryIds": []
+  "deletedInquiryIds": [1, "1", "+91 9876543210", "ramesh@example.com"]
 }

@@ -63,13 +63,33 @@ router.delete('/:id', (req, res) => {
   db.inquiries = db.inquiries || [];
   db.deletedInquiryIds = db.deletedInquiryIds || [];
   const param = String(req.params.id).trim();
+  const paramLower = param.toLowerCase();
 
   const initialCount = db.inquiries.length;
-  db.inquiries = db.inquiries.filter(i => String(i.id) !== param);
+  const matched = db.inquiries.filter(i => 
+    String(i.id) === param || 
+    (i.phone && String(i.phone).trim() === param) ||
+    (i.email && String(i.email).trim().toLowerCase() === paramLower)
+  );
 
-  if (!db.deletedInquiryIds.includes(param)) {
-    db.deletedInquiryIds.push(param);
-  }
+  db.inquiries = db.inquiries.filter(i => 
+    String(i.id) !== param && 
+    !(i.phone && String(i.phone).trim() === param) &&
+    !(i.email && String(i.email).trim().toLowerCase() === paramLower)
+  );
+
+  const idsToAdd = [param, paramLower];
+  matched.forEach(i => {
+    if (i.id) idsToAdd.push(String(i.id));
+    if (i.phone) idsToAdd.push(String(i.phone).trim());
+    if (i.email) idsToAdd.push(String(i.email).trim().toLowerCase());
+  });
+
+  idsToAdd.forEach(item => {
+    if (item && !db.deletedInquiryIds.includes(item)) {
+      db.deletedInquiryIds.push(item);
+    }
+  });
 
   writeDb(db);
 
