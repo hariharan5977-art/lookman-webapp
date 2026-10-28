@@ -9,29 +9,25 @@ const BRANDS_LIST = [
 export default function BrandsPage({ onSelectCategory, onOpenQuote }) {
   const [selectedBrand, setSelectedBrand] = useState('color-on');
 
-  const handleBrandClick = (brandId) => {
-    setSelectedBrand(brandId);
-  };
-
   return (
-    <div className="w-full bg-transparent font-body text-slate-700">
-      <div className="w-full max-w-[2000px] mx-auto wide-2000-symmetric pb-12 overflow-hidden">
+    <div className="w-full bg-transparent font-body text-slate-700 min-h-screen">
+      <div className="w-full max-w-[2000px] mx-auto wide-2000-symmetric pb-16 overflow-hidden">
         
-        {/* Mobile Brands Horizontal Strip */}
-        <div className="block md:hidden mb-4 overflow-x-auto pb-1">
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
+        {/* ── MOBILE HORIZONTAL BRAND CHIPS (< md) ── */}
+        <div className="md:hidden w-full overflow-x-auto pb-3 mb-4 scrollbar-none anim-card-slide-left">
+          <div className="flex items-center gap-2 min-w-max px-0.5">
             {BRANDS_LIST.map((brand) => {
               const isActive = selectedBrand === brand.id;
               return (
                 <button
                   key={brand.id}
-                  type="button"
-                  onClick={() => handleBrandClick(brand.id)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-heading transition-all cursor-pointer border ${
+                  onClick={() => setSelectedBrand(brand.id)}
+                  className={`px-3.5 py-2 rounded-full text-xs font-heading font-bold transition-all whitespace-nowrap cursor-pointer ${
                     isActive
-                      ? 'bg-[#ea0004] text-white border-[#ea0004] font-bold shadow-xs'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium'
+                      ? 'text-white shadow-md'
+                      : 'bg-white text-slate-600 border border-slate-200/80 hover:text-[#ea0004]'
                   }`}
+                  style={isActive ? { background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' } : {}}
                 >
                   {brand.name}
                 </button>
@@ -40,46 +36,52 @@ export default function BrandsPage({ onSelectCategory, onOpenQuote }) {
           </div>
         </div>
 
-        {/* 2-Column Layout: Left Brands Sidebar & Right Reduced-Size Brand Card */}
-        <div className="w-full flex flex-col md:flex-row items-start gap-6 text-left">
+        {/* ── TWO-COLUMN LAYOUT: LEFT SIDEBAR (DESKTOP) + RIGHT CONTENT (MATCHING SOLUTIONS PAGE) ── */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-10 xl:gap-12 items-start">
           
-          {/* Left Column: Brands Sidebar */}
-          <aside className="w-full md:w-56 lg:w-60 min-[2000px]:w-64 shrink-0 border border-slate-200/90 rounded-2xl overflow-hidden bg-white shadow-sm">
-            <div className="bg-[#f8fafd] text-[#101f46] px-5 py-3 text-sm font-heading font-bold border-b border-slate-200/80 text-left">
+          {/* ── 1. LEFT SIDEBAR NAVIGATION: BRANDS LIST (ANIM-CARD-SLIDE-LEFT) ── */}
+          <div className="hidden md:block w-full md:w-60 lg:w-64 min-[2000px]:w-72 shrink-0 border border-slate-200/80 rounded-xl overflow-hidden bg-white shadow-lg anim-card-slide-left">
+            {/* Sidebar Header */}
+            <div className="bg-[#f8fafd] text-[#101f46] px-4 py-3 text-sm font-heading font-bold border-b border-slate-200/90 text-left">
               Brands
             </div>
-            <div className="divide-y divide-slate-100">
+            
+            {/* Sidebar Menu Items */}
+            <div className="divide-y divide-slate-200/60">
               {BRANDS_LIST.map((brand) => {
                 const isActive = selectedBrand === brand.id;
                 return (
                   <button
                     key={brand.id}
-                    type="button"
-                    onClick={() => handleBrandClick(brand.id)}
-                    className={`w-full text-left pl-5 pr-4 py-2.5 text-xs sm:text-sm font-heading transition-all relative flex items-center justify-between cursor-pointer ${
+                    onClick={() => setSelectedBrand(brand.id)}
+                    className={`w-full text-left pl-5 pr-4 py-3 text-xs sm:text-sm font-heading transition-all relative flex items-center justify-between cursor-pointer ${
                       isActive
-                        ? 'bg-[#fcfdfe] text-[#101f46] font-bold shadow-2xs'
-                        : 'bg-white text-slate-700 font-medium hover:bg-[#f8fafd] hover:text-[#ea0004]'
+                        ? 'bg-[#fcfdfe] shadow-2xs font-bold'
+                        : 'bg-white text-slate-700 font-medium hover:bg-slate-50 hover:text-[#ea0004]'
                     }`}
                   >
+                    {/* Double-Shaded Gradient Selection Marker Line at Left Edge */}
                     {isActive && (
                       <span 
                         className="absolute left-0 top-0 bottom-0 w-1 rounded-r-xs"
                         style={{ background: 'linear-gradient(180deg, #ea0004 0%, #6a0006 100%)' }}
                       />
                     )}
+
+                    {/* Double-Shaded Gradient Selected Text Color */}
                     <span className={isActive ? 'hero-title-gradient font-bold' : ''}>
                       {brand.name}
                     </span>
+
                     <ChevronRight size={14} className={isActive ? 'text-[#ea0004]' : 'text-slate-400'} />
                   </button>
                 );
               })}
             </div>
-          </aside>
+          </div>
 
-          {/* Right Column: Reduced-Size Compact Color On Card */}
-          <main className="flex-1 max-w-3xl bg-white rounded-2xl p-5 sm:p-6 lg:p-7 shadow-md border border-slate-200/90 relative overflow-hidden flex flex-col justify-between anim-card-slide-right">
+          {/* ── 2. RIGHT MAIN CONTENT AREA: COLOR ON CARD (EXACT SOLUTIONS PAGE CARD WIDTH & ANIM-CARD-SLIDE-RIGHT) ── */}
+          <div className="flex-1 w-full space-y-6 sm:space-y-8 text-left bg-white/95 backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-lg border border-slate-100 anim-card-slide-right relative overflow-hidden">
             
             {/* Subtle ambient surveillance video */}
             <video
@@ -99,15 +101,16 @@ export default function BrandsPage({ onSelectCategory, onOpenQuote }) {
               }}
             />
 
-            <div className="relative z-10 space-y-4">
+            <div className="relative z-10 space-y-6">
               
-              {/* Header: Title and Logo */}
+              {/* Header: Title with Gradient Accent Bar and Logo */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-heading font-black text-[#101f46] tracking-tight">
-                    Color On Surveillance Systems
+                  <h1 className="text-xl sm:text-2xl font-heading font-bold text-[#101f46] flex items-center gap-2">
+                    <span>Color On Surveillance Systems</span>
+                    <span className="hero-title-gradient font-bold">|</span>
                   </h1>
-                  <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                  <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
                     24/7 Full Color High-Definition Surveillance &amp; AI Hardware
                   </p>
                 </div>
@@ -119,32 +122,32 @@ export default function BrandsPage({ onSelectCategory, onOpenQuote }) {
               </div>
 
               {/* Main Body */}
-              <div className="space-y-2 text-left">
-                <h2 className="text-sm sm:text-base font-heading font-bold text-[#101f46] tracking-tight">
+              <div className="space-y-2.5 max-w-3xl text-left">
+                <h2 className="text-sm sm:text-base font-heading font-bold text-[#101f46]">
                   Full Spectrum Color Optics, Even in Zero Light
                 </h2>
-                <p className="text-xs sm:text-[13px] text-slate-600 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body font-normal">
                   Color On is an industry-leading security technology brand engineered to deliver vivid, full-spectrum color video capture 24/7. Equipped with advanced F1.0 super-large apertures, cutting-edge optical sensors, and warm auxiliary illumination, Color On cameras ensure pristine clarity even in zero-lux pitch darkness.
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-2.5">
+              <div className="pt-2 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={() => onSelectCategory && onSelectCategory('HD IP Camera')}
-                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
                   style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
                 >
                   <span>Explore Color On Products</span>
-                  <ArrowRight size={13} />
+                  <ArrowRight size={14} />
                 </button>
 
                 {onOpenQuote && (
                   <button
                     type="button"
                     onClick={onOpenQuote}
-                    className="px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs transition-colors cursor-pointer"
+                    className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs transition-colors cursor-pointer"
                   >
                     Request Brand Quotation
                   </button>
@@ -153,7 +156,7 @@ export default function BrandsPage({ onSelectCategory, onOpenQuote }) {
 
             </div>
 
-          </main>
+          </div>
 
         </div>
 
