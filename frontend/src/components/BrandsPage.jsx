@@ -80,80 +80,78 @@ export default function BrandsPage({ onSelectCategory, onOpenQuote }) {
             </div>
           </div>
 
-          {/* ── 2. RIGHT MAIN CONTENT AREA: COLOR ON CARD (EXACT SOLUTIONS PAGE CARD WIDTH & ANIM-CARD-SLIDE-RIGHT) ── */}
+          {/* ── 2. RIGHT MAIN CONTENT AREA: COLOR ON CARD ── */}
           <div className="flex-1 w-full space-y-6 sm:space-y-8 text-left bg-white/95 backdrop-blur-md rounded-2xl p-6 sm:p-8 lg:p-10 shadow-lg border border-slate-100 anim-card-slide-right relative overflow-hidden">
             
-            {/* Subtle ambient surveillance video */}
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-15 scale-105"
-              src="/videos/sol_commercial.mp4"
-            />
-
-            {/* Gradient wash overlay */}
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(to right, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 55%, rgba(255,255,255,0.88) 100%)'
-              }}
-            />
-
-            <div className="relative z-10 space-y-6">
-              
-              {/* Header: Title with Gradient Accent Bar and Logo */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-heading font-bold text-[#101f46] flex items-center gap-2">
-                    <span>Color On Surveillance Systems</span>
-                    <span className="hero-title-gradient font-bold">|</span>
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-                    24/7 Full Color High-Definition Surveillance &amp; AI Hardware
-                  </p>
-                </div>
-                <img 
-                  src="/color_on_logo.png" 
-                  alt="Color On Surveillance Systems" 
-                  className="h-10 sm:h-12 w-auto object-contain select-none self-start sm:self-auto"
-                />
-              </div>
-
-              {/* Main Body */}
-              <div className="space-y-2.5 max-w-3xl text-left">
-                <h2 className="text-sm sm:text-base font-heading font-bold text-[#101f46]">
-                  Full Spectrum Color Optics, Even in Zero Light
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body font-normal">
-                  Color On is an industry-leading security technology brand engineered to deliver vivid, full-spectrum color video capture 24/7. Equipped with advanced F1.0 super-large apertures, cutting-edge optical sensors, and warm auxiliary illumination, Color On cameras ensure pristine clarity even in zero-lux pitch darkness.
+            {/* Header: Title with Gradient Accent Bar and Logo */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-heading font-bold text-[#101f46] flex items-center gap-2">
+                  <span>Color On Surveillance Systems</span>
+                  <span className="hero-title-gradient font-bold">|</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+                  24/7 Full Color High-Definition Surveillance &amp; AI Hardware
                 </p>
               </div>
+              <img 
+                src="/color_on_logo.png" 
+                alt="Color On Surveillance Systems" 
+                className="h-10 sm:h-12 w-auto object-contain select-none self-start sm:self-auto"
+              />
+            </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2 flex flex-wrap items-center gap-3">
+            {/* Main Body */}
+            <div className="space-y-2.5 max-w-3xl text-left">
+              <h2 className="text-sm sm:text-base font-heading font-bold text-[#101f46]">
+                Full Spectrum Color Optics, Even in Zero Light
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-body font-normal">
+                Color On is an industry-leading security technology brand engineered to deliver vivid, full-spectrum color video capture 24/7. Equipped with advanced F1.0 super-large apertures, cutting-edge optical sensors, and warm auxiliary illumination, Color On cameras ensure pristine clarity even in zero-lux pitch darkness.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-1 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => onSelectCategory && onSelectCategory('HD IP Camera')}
+                className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
+              >
+                <span>Explore Color On Products</span>
+                <ArrowRight size={14} />
+              </button>
+
+              {onOpenQuote && (
                 <button
                   type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('HD IP Camera')}
-                  className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer"
-                  style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
+                  onClick={onOpenQuote}
+                  className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs transition-colors cursor-pointer"
                 >
-                  <span>Explore Color On Products</span>
-                  <ArrowRight size={14} />
+                  Request Brand Quotation
                 </button>
+              )}
+            </div>
 
-                {onOpenQuote && (
-                  <button
-                    type="button"
-                    onClick={onOpenQuote}
-                    className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-heading font-bold text-xs transition-colors cursor-pointer"
-                  >
-                    Request Brand Quotation
-                  </button>
-                )}
+            {/* ── VIDEO SHOWCASE MOVED TO BOTTOM OF BRAND CARD ── */}
+            <div className="pt-4 border-t border-slate-100">
+              <div className="w-full rounded-2xl overflow-hidden border border-slate-200/90 shadow-md relative bg-slate-950 aspect-video sm:aspect-[21/9] max-h-[380px] group">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                  src="/videos/sol_commercial.mp4"
+                />
+                
+                {/* Surveillance feed live badge */}
+                <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white text-[10.5px] font-mono font-bold px-3 py-1 rounded-full border border-white/10 flex items-center gap-2 pointer-events-none shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-[#ea0004] animate-pulse" />
+                  <span>COLOR ON 24/7 LIVE FEED</span>
+                </div>
               </div>
-
             </div>
 
           </div>
