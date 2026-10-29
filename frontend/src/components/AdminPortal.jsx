@@ -4,7 +4,7 @@ import { API_BASE } from '../api';
 import ALL_LOOKMAN_PRODUCTS from '../data/allProducts.json';
 
 export default function AdminPortal({ isOpen, onClose, user, onLogin, onLogout }) {
-  const [loginEmail, setLoginEmail] = useState('beyonddigitalchennai@gmail.com');
+  const [loginEmail, setLoginEmail] = useState('lookman@lookmanai.com');
   const [loginPassword, setLoginPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -69,8 +69,8 @@ export default function AdminPortal({ isOpen, onClose, user, onLogin, onLogout }
     setAuthLoading(true);
 
     const inputEmail = loginEmail.trim().toLowerCase();
-    const isTargetUser = inputEmail === 'beyonddigitalchennai@gmail.com' || inputEmail === 'admin@lookman.xyz' || inputEmail === 'admin';
-    const isTargetPass = loginPassword === 'BeyondLookman@2026' || loginPassword === 'admin123' || loginPassword === 'lookman2026';
+    const isTargetUser = inputEmail === 'lookman@lookmanai.com' || inputEmail === 'admin@lookman.xyz' || inputEmail === 'admin';
+    const isTargetPass = loginPassword === 'Lookman@2026' || loginPassword === 'admin123' || loginPassword === 'lookman2026';
 
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
@@ -94,7 +94,7 @@ export default function AdminPortal({ isOpen, onClose, user, onLogin, onLogout }
       // Backend server is offline or on static Netlify deploy - use verified offline admin credentials
       if (isTargetUser && isTargetPass) {
         const fallbackUser = {
-          username: 'beyonddigitalchennai@gmail.com',
+          username: 'lookman@lookmanai.com',
           role: 'administrator',
           company: 'LOOKMAN DISTRIBUTION PRIVATE LIMITED'
         };
@@ -245,7 +245,7 @@ export default function AdminPortal({ isOpen, onClose, user, onLogin, onLogout }
                   required
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="BeyondLookman@2026"
+                  placeholder="Lookman@2026"
                   className="w-full bg-slate-50/80 border border-gray-200 focus:border-[#ea0004] focus:bg-white text-[#12182b] p-3 rounded-xl outline-none shadow-xs transition-all text-xs"
                 />
               </div>

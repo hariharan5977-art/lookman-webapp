@@ -39,7 +39,7 @@ import { API_BASE } from '../api';
 import ALL_LOOKMAN_PRODUCTS from '../data/allProducts.json';
 
 export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
-  const [loginEmail, setLoginEmail] = useState('beyonddigitalchennai@gmail.com');
+  const [loginEmail, setLoginEmail] = useState('lookman@lookmanai.com');
   const [loginPassword, setLoginPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -210,8 +210,8 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     setAuthLoading(true);
 
     const inputEmail = loginEmail.trim().toLowerCase();
-    const isTargetUser = inputEmail === 'beyonddigitalchennai@gmail.com' || inputEmail === 'admin@lookman.xyz' || inputEmail === 'admin';
-    const isTargetPass = loginPassword === 'BeyondLookman@2026' || loginPassword === 'admin123' || loginPassword === 'lookman2026';
+    const isTargetUser = inputEmail === 'lookman@lookmanai.com' || inputEmail === 'admin@lookman.xyz' || inputEmail === 'admin';
+    const isTargetPass = loginPassword === 'Lookman@2026' || loginPassword === 'admin123' || loginPassword === 'lookman2026';
 
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
@@ -235,7 +235,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       // Fallback for static Netlify hosting
       if (isTargetUser && isTargetPass) {
         const fallbackUser = {
-          username: 'beyonddigitalchennai@gmail.com',
+          username: 'lookman@lookmanai.com',
           role: 'administrator',
           company: 'LOOKMAN DISTRIBUTION PRIVATE LIMITED'
         };
@@ -1264,7 +1264,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                 required
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
-                placeholder="beyonddigitalchennai@gmail.com"
+                placeholder="lookman@lookmanai.com"
                 className="w-full bg-slate-50 border border-gray-200 focus:border-[#ea0004] focus:bg-white text-[#12182b] p-3.5 rounded-xl outline-none shadow-xs transition-all text-xs"
               />
             </div>
@@ -1276,7 +1276,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
                 required
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder="BeyondLookman@2026"
+                placeholder="Lookman@2026"
                 className="w-full bg-slate-50 border border-gray-200 focus:border-[#ea0004] focus:bg-white text-[#12182b] p-3.5 rounded-xl outline-none shadow-xs transition-all text-xs"
               />
             </div>

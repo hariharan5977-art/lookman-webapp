@@ -13,7 +13,7 @@ async function runAdminPortalTests(reporter) {
       await page.waitForSelector('form', { timeout: 6000 });
 
       // Fill invalid password
-      await page.locator('input[type="email"]').first().fill('beyonddigitalchennai@gmail.com');
+      await page.locator('input[type="email"]').first().fill('lookman@lookmanai.com');
       await page.locator('input[type="password"]').first().fill('WrongPassword999!');
       await page.locator('form button[type="submit"]').first().click();
 
@@ -42,8 +42,8 @@ async function runAdminPortalTests(reporter) {
     // 5.2 Valid Administrator Login & Session Establishment
     const tAuthSuccess = Date.now();
     try {
-      await page.locator('input[type="email"]').first().fill('beyonddigitalchennai@gmail.com');
-      await page.locator('input[type="password"]').first().fill('BeyondLookman@2026');
+      await page.locator('input[type="email"]').first().fill('lookman@lookmanai.com');
+      await page.locator('input[type="password"]').first().fill('Lookman@2026');
       await page.locator('form button[type="submit"]').first().click();
 
       // Wait for Admin Dashboard header

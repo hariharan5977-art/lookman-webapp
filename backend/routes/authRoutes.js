@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
       const user = await User.findOne({ username: inputUser }).lean();
       if (user) {
         let isMatch = false;
-        if (password === user.plainPasswordHint || password === 'BeyondLookman@2026') {
+        if (password === user.plainPasswordHint || password === 'Lookman@2026') {
           isMatch = true;
         } else if (user.passwordHash) {
           isMatch = await bcrypt.compare(password, user.passwordHash).catch(() => false);
@@ -62,13 +62,14 @@ router.post('/login', async (req, res) => {
   // 2. Local JSON database fallback
   const db = readDb();
   const admin = db.admin || {
-    username: 'beyonddigitalchennai@gmail.com',
+    username: 'lookman@lookmanai.com',
+    plainPasswordHint: 'Lookman@2026',
     role: 'administrator',
     company: 'LOOKMAN DISTRIBUTION PRIVATE LIMITED'
   };
 
-  const targetUser = (admin.username || '').toLowerCase();
-  if (inputUser === targetUser && (password === admin.plainPasswordHint || password === 'BeyondLookman@2026')) {
+  const targetUser = (admin.username || 'lookman@lookmanai.com').toLowerCase();
+  if (inputUser === targetUser && (password === admin.plainPasswordHint || password === 'Lookman@2026')) {
     const token = jwt.sign(
       { username: admin.username, role: admin.role, company: admin.company },
       JWT_SECRET,

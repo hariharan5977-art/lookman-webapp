@@ -1,8 +1,8 @@
 {
   "admin": {
-    "username": "beyonddigitalchennai@gmail.com",
-    "passwordHash": "$2a$10$w09u7hO3E45m0cM/V65a6.002H/F/vE9Zq.n5K4aY7C3Z65g67g6K",
-    "plainPasswordHint": "BeyondLookman@2026",
+    "username": "lookman@lookmanai.com",
+    "passwordHash": "$2a$10$GEuI6DMm1mGuALglwDkcPu1t1wZ/TwpSb2dX6SJVgYv7QtDJz8bn6",
+    "plainPasswordHint": "Lookman@2026",
     "role": "administrator",
     "company": "LOOKMAN DISTRIBUTION PRIVATE LIMITED"
   },
