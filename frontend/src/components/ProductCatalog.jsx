@@ -299,15 +299,20 @@ export default function ProductCatalog({
     }
   }, [selectedCategory]);
 
-  // Combine fetched API products with baseline products, strictly excluding Secura serials
+  // Combine fetched API products with baseline products, strictly excluding Secura serials & obsolete samples
   const allAvailableProducts = useMemo(() => {
     const sourceList = (products && products.length > 0) ? products : ALL_LOOKMAN_PRODUCTS;
+    const obsoleteCodes = [
+      'CO-IP-401FDA', 'CO-IP-201FDMA', 'CO-PTZ-8032AI', 'CO-PTZ-2025AI', 
+      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE'
+    ];
     return sourceList.filter(p => {
       if (!p) return false;
-      const m = String(p.model || p.name || '').toUpperCase().trim();
+      const m = String(p.model || p.name || p.productCode || p.id || '').toUpperCase().trim();
       const b = String(p.brand || '').toLowerCase().trim();
-      // Remove all Secura serial name cameras
-      return !m.startsWith('SIP-') && !m.startsWith('SHD-') && !m.startsWith('SNVR-') && !m.startsWith('SXVR-') && b !== 'secura';
+      const isSecura = m.startsWith('SIP-') || m.startsWith('SHD-') || m.startsWith('SNVR-') || m.startsWith('SXVR-') || b === 'secura';
+      const isObsolete = obsoleteCodes.includes(m);
+      return !isSecura && !isObsolete;
     }).map(p => {
       let cleanDesc = (p.description || p.title || '').replace(/\[\/?et_pb_[^\]]*\]/g, '').replace(/<[^>]*>/g, '').trim();
       if (!cleanDesc || cleanDesc.length < 10) {

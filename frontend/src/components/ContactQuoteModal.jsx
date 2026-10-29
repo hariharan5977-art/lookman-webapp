@@ -1,59 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Send, CheckCircle2, Check, Plus, Package } from './Icons';
 import { Minus } from 'lucide-react';
 import { API_BASE } from '../api';
-
-const EQUIPMENT_OPTIONS = [
-  {
-    id: 'CO-H-2BFDML(V)',
-    name: '2MP Full-Color HD Bullet Camera',
-    code: 'CO-H-2BFDML(V)',
-    type: 'Analog HD Bullet',
-    image: '/color_on_bullet_hd.png'
-  },
-  {
-    id: 'CO-H-2DFDML(V)',
-    name: '2MP Full-Color HD Turret Camera',
-    code: 'CO-H-2DFDML(V)',
-    type: 'Analog HD Turret',
-    image: '/CO-H-2DFDML(V).png'
-  },
-  {
-    id: 'CO-IP-401FDA',
-    name: '4MP AI Active Deterrence IP Bullet',
-    code: 'CO-IP-401FDA',
-    type: 'AI IP Bullet',
-    image: '/SIP-VB401ADA.png'
-  },
-  {
-    id: 'CO-IP-201FDMA',
-    name: '2MP Audio IP Turret Camera',
-    code: 'CO-IP-201FDMA',
-    type: 'Audio IP Turret',
-    image: '/turret_camera_product.png'
-  },
-  {
-    id: 'CO-PTZ-8032AI',
-    name: '8MP 4K Starlight PTZ Speed Dome',
-    code: 'CO-PTZ-8032AI',
-    type: '360° PTZ Camera',
-    image: '/SIP-VPS8032AI.png'
-  },
-  {
-    id: 'CO-NVR-0432AI',
-    name: '32-Channel 4K AI NVR Recorder',
-    code: 'CO-NVR-0432AI',
-    type: 'Network Video Recorder',
-    image: '/SNVR-V0432AI.png'
-  },
-  {
-    id: 'CO-SW-0802POE',
-    name: '8-Port Gigabit PoE+ Network Switch',
-    code: 'CO-SW-0802POE',
-    type: 'PoE Switch',
-    image: '/camera_unbranded.png'
-  }
-];
+import ALL_LOOKMAN_PRODUCTS from '../data/allProducts.json';
+import { resolveProductCode, resolveProductName } from '../utils/productUtils';
 
 const INSTALLATION_AREAS = [
   { id: 'school', name: 'School', desc: 'Campuses, Classrooms & Hallways', emoji: '🏫' },
@@ -66,7 +16,7 @@ const INSTALLATION_AREAS = [
   { id: 'shop', name: 'Shop', desc: 'Retail Showrooms & Stores', emoji: '🛍️' }
 ];
 
-export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
+export default function ContactQuoteModal({ isOpen, onClose, initialDetails, products }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -75,19 +25,39 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
     message: ''
   });
 
+  // Derive available equipment dynamically from active catalog products
+  const equipmentList = useMemo(() => {
+    const sourceList = Array.isArray(products) && products.length > 0 ? products : ALL_LOOKMAN_PRODUCTS;
+    const obsoleteCodes = [
+      'CO-IP-401FDA', 'CO-IP-201FDMA', 'CO-PTZ-8032AI', 'CO-PTZ-2025AI', 
+      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE'
+    ];
+    return sourceList.filter(p => {
+      if (!p) return false;
+      const m = String(p.model || p.name || p.productCode || p.id || '').toUpperCase().trim();
+      const b = String(p.brand || '').toLowerCase().trim();
+      const isSecura = m.startsWith('SIP-') || m.startsWith('SHD-') || m.startsWith('SNVR-') || m.startsWith('SXVR-') || b === 'secura';
+      const isObsolete = obsoleteCodes.includes(m);
+      return !isSecura && !isObsolete;
+    }).map(p => {
+      const code = resolveProductCode(p);
+      const name = resolveProductName(p);
+      const isBullet = code.toUpperCase().includes('BFD') || name.toLowerCase().includes('bullet');
+      return {
+        id: p.id || code,
+        name: name,
+        code: code,
+        type: p.category || (isBullet ? 'Analog HD Bullet' : 'Analog HD Turret'),
+        image: p.image || (isBullet ? '/color_on_bullet_hd.png' : '/color_on_turret_hd.png')
+      };
+    });
+  }, [products]);
+
   // Selection mode: 'products' (+ and - cameras) vs 'area' (installation site)
   const [selectionMode, setSelectionMode] = useState('products');
 
-  // Quantities for each camera product
-  const [quantities, setQuantities] = useState({
-    'CO-H-2BFDML(V)': 0,
-    'CO-H-2DFDML(V)': 0,
-    'CO-IP-401FDA': 0,
-    'CO-IP-201FDMA': 0,
-    'CO-PTZ-8032AI': 0,
-    'CO-NVR-0432AI': 0,
-    'CO-SW-0802POE': 0
-  });
+  // Quantities for each camera product (dynamic per product ID)
+  const [quantities, setQuantities] = useState({});
 
   // Selected installation areas
   const [selectedAreas, setSelectedAreas] = useState([]);
@@ -102,8 +72,12 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
       
       // Check if matches an equipment model
       let matchedModel = null;
-      for (const eq of EQUIPMENT_OPTIONS) {
-        if (lower.includes(eq.code.toLowerCase()) || lower.includes(eq.name.toLowerCase())) {
+      for (const eq of equipmentList) {
+        if (
+          lower.includes(eq.code.toLowerCase()) || 
+          lower.includes(eq.name.toLowerCase()) || 
+          lower.includes(String(eq.id).toLowerCase())
+        ) {
           matchedModel = eq.id;
           break;
         }
@@ -129,7 +103,7 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
         message: prev.message || initialDetails
       }));
     }
-  }, [initialDetails, isOpen]);
+  }, [initialDetails, isOpen, equipmentList]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -211,7 +185,7 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
       solution: solutionTag,
       message: finalMessage,
       selectionMode,
-      selectedProducts: EQUIPMENT_OPTIONS
+      selectedProducts: equipmentList
         .filter(eq => (quantities[eq.id] || 0) > 0)
         .map(eq => ({ id: eq.id, name: eq.name, code: eq.code, qty: quantities[eq.id] })),
       selectedAreas,
@@ -253,15 +227,7 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
   const handleResetForm = () => {
     setStatus({ loading: false, success: false, error: '' });
     setFormData({ name: '', email: '', phone: '', company: '', message: '' });
-    setQuantities({
-      'CO-H-2BFDML(V)': 0,
-      'CO-H-2DFDML(V)': 0,
-      'CO-IP-401FDA': 0,
-      'CO-IP-201FDMA': 0,
-      'CO-PTZ-8032AI': 0,
-      'CO-NVR-0432AI': 0,
-      'CO-SW-0802POE': 0
-    });
+    setQuantities({});
     setSelectedAreas([]);
     setAreaCameraCount(4);
     onClose();
@@ -433,9 +399,14 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
                 </div>
 
                 <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1 rounded-2xl border border-slate-200/80 p-2 bg-slate-50/50">
-                  {EQUIPMENT_OPTIONS.map((eq) => {
-                    const qty = quantities[eq.id] || 0;
-                    const isSelected = qty > 0;
+                  {equipmentList.length === 0 ? (
+                    <div className="py-6 text-center text-xs text-slate-400">
+                      No cameras currently available for quotation.
+                    </div>
+                  ) : (
+                    equipmentList.map((eq) => {
+                      const qty = quantities[eq.id] || 0;
+                      const isSelected = qty > 0;
 
                     return (
                       <div
@@ -498,7 +469,7 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails }) {
                         </div>
                       </div>
                     );
-                  })}
+                  }))}
                 </div>
               </div>
             )}

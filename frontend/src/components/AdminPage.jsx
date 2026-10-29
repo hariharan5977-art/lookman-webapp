@@ -170,15 +170,25 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     const cleanLocalInqs = localInqs.filter(li => !isDeletedInquiry(li));
     const mergedInquiries = [...cleanInqs, ...cleanLocalInqs.filter(li => !cleanInqs.some(i => String(i.id) === String(li.id)))];
 
-    // 3. Merge products with custom products & all catalog products, strictly filtering out Secura & deleted items
+    const obsoleteCodes = [
+      'CO-IP-401FDA', 'CO-IP-201FDMA', 'CO-PTZ-8032AI', 'CO-PTZ-2025AI', 
+      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE'
+    ];
+    const isObsoleteSample = (p) => {
+      if (!p) return false;
+      const m = String(p.model || p.productCode || p.id || '').toUpperCase().trim();
+      return obsoleteCodes.includes(m);
+    };
+
+    // 3. Merge products with custom products & all catalog products, strictly filtering out Secura, obsolete & deleted items
     const rawCustom = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
-    const cleanedCustom = rawCustom.filter(p => !isSecuraSerial(p));
+    const cleanedCustom = rawCustom.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
     if (cleanedCustom.length !== rawCustom.length) {
       localStorage.setItem('lookman_custom_products', JSON.stringify(cleanedCustom));
     }
 
-    const customProds = cleanedCustom.filter(p => !isDeleted(p) && !isSecuraSerial(p));
-    const baseProds = (prods.length > 0 ? prods : ALL_LOOKMAN_PRODUCTS).filter(p => !isDeleted(p) && !isSecuraSerial(p));
+    const customProds = cleanedCustom.filter(p => !isDeleted(p) && !isSecuraSerial(p) && !isObsoleteSample(p));
+    const baseProds = (prods.length > 0 ? prods : ALL_LOOKMAN_PRODUCTS).filter(p => !isDeleted(p) && !isSecuraSerial(p) && !isObsoleteSample(p));
 
     const combined = [...customProds];
     baseProds.forEach(bp => {

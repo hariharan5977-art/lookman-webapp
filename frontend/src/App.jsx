@@ -315,9 +315,20 @@ export default function App() {
       return m.startsWith('SIP-') || m.startsWith('SHD-') || m.startsWith('SNVR-') || m.startsWith('SXVR-') || b === 'secura';
     };
 
-    // Clean up local storage from old Secura items
+    // Helper to identify obsolete sample / placeholder products
+    const isObsoleteSample = (p) => {
+      if (!p) return false;
+      const m = String(p.model || p.productCode || p.id || '').toUpperCase().trim();
+      const obsoleteCodes = [
+        'CO-IP-401FDA', 'CO-IP-201FDMA', 'CO-PTZ-8032AI', 'CO-PTZ-2025AI', 
+        'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE'
+      ];
+      return obsoleteCodes.includes(m);
+    };
+
+    // Clean up local storage from old Secura & placeholder items
     const rawCustom = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
-    const cleanedCustom = rawCustom.filter(p => !isSecuraSerial(p));
+    const cleanedCustom = rawCustom.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
     if (cleanedCustom.length !== rawCustom.length) {
       localStorage.setItem('lookman_custom_products', JSON.stringify(cleanedCustom));
     }
@@ -339,14 +350,14 @@ export default function App() {
       });
     };
 
-    const customProds = cleanedCustom.filter(p => !isDeleted(p) && !isSecuraSerial(p));
+    const customProds = cleanedCustom.filter(p => !isDeleted(p) && !isSecuraSerial(p) && !isObsoleteSample(p));
     
     // Combine custom products and base products (custom products always first on top)
     const combined = [...customProds];
 
     // Merge backend products from db.json
     prods.forEach(bp => {
-      if (isDeleted(bp) || isSecuraSerial(bp)) return;
+      if (isDeleted(bp) || isSecuraSerial(bp) || isObsoleteSample(bp)) return;
       const bpModel = (bp.model || bp.name || '').toLowerCase();
       const bpId = String(bp.id || '');
       const already = combined.some(cp => 
@@ -361,7 +372,7 @@ export default function App() {
 
     // Merge any static baseline products not already in the combined list
     ALL_LOOKMAN_PRODUCTS.forEach(bp => {
-      if (isDeleted(bp) || isSecuraSerial(bp)) return;
+      if (isDeleted(bp) || isSecuraSerial(bp) || isObsoleteSample(bp)) return;
       const bpModel = (bp.model || bp.name || '').toLowerCase();
       const bpId = String(bp.id || '');
       const already = combined.some(cp => 
@@ -731,6 +742,7 @@ export default function App() {
         isOpen={contactOpen}
         onClose={() => setContactOpen(false)}
         initialDetails={quoteDetails}
+        products={products}
       />
 
       {/* ── ORIGINAL LOOKMAN HOMEPAGE FOOTER ── */}
