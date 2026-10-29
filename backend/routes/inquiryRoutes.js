@@ -27,11 +27,10 @@ router.get('/', async (req, res) => {
       ]);
 
       const deletedIds = deletedDocs.map(d => d.identifier.toLowerCase());
+      // Filter out only specific deleted inquiry IDs, never blacklisting customers by phone or email
       const filtered = mongoInqs.filter(i => {
         const iId = String(i.id || '').toLowerCase();
-        const iPhone = String(i.phone || '').trim().toLowerCase();
-        const iEmail = String(i.email || '').trim().toLowerCase();
-        return !deletedIds.includes(iId) && (!iPhone || !deletedIds.includes(iPhone)) && (!iEmail || !deletedIds.includes(iEmail));
+        return !deletedIds.includes(iId);
       });
 
       return res.json({

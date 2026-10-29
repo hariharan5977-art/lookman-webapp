@@ -276,12 +276,24 @@
       "productCode": "CO-H-2DFDML(V)"
     }
   ],
-  "inquiries": [],
+  "inquiries": [
+    {
+      "id": "1793265207878",
+      "name": "Hari Test",
+      "email": "hari@test.com",
+      "phone": "9876543210",
+      "company": "Test Corp",
+      "solution": "General Inquiry",
+      "message": "Quote for 2 cameras",
+      "selectionMode": "products",
+      "selectedProducts": [],
+      "selectedAreas": [],
+      "cameraCount": 0,
+      "createdAt": "2026-10-29T09:13:27.878Z"
+    }
+  ],
   "deletedProductIds": [],
   "deletedInquiryIds": [
-    1,
-    "1",
-    "+91 9876543210",
-    "ramesh@example.com"
+    "1"
   ]
 }
