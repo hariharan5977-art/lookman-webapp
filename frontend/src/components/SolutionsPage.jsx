@@ -24,10 +24,10 @@ export const SOLUTIONS_DATA = [
       'Enables parents and administrative boards to audit campus safety operations smoothly.'
     ],
     applications: [
-      { src: '/cctv_school_view.jpg', title: 'Main Campus Entrance' },
-      { src: '/cctv_school_hallway_view.jpg', title: 'Academic Corridor Wing' },
-      { src: '/cctv_school_1.jpg', title: 'Perimeter Defense Zone' },
-      { src: '/cctv_school_2.jpg', title: 'Student Dormitory Entry' }
+      { src: '/cctv_indian_school_gate.jpg', title: 'Main Campus Entrance Gate' },
+      { src: '/cctv_indian_school_corridor.jpg', title: 'Academic Corridor & Classrooms' },
+      { src: '/cctv_indian_school_ground.jpg', title: 'Assembly Ground & Sports Field' },
+      { src: '/cctv_indian_school_busbay.jpg', title: 'Campus Bus Depot & Boarding Bay' }
     ]
   },
   {
@@ -50,10 +50,10 @@ export const SOLUTIONS_DATA = [
       'Provides real-time emergency triage visibility to medical directors.'
     ],
     applications: [
-      { src: '/cctv_hospital_view.jpg', title: 'ER Admissions & Triage' },
-      { src: '/cctv_hospital_ward_view.jpg', title: 'Intensive Care Unit Wing' },
-      { src: '/cctv_hotel_1.jpg', title: 'Hospital Main Atrium' },
-      { src: '/cctv_hotel_2.jpg', title: 'Pharmacy Vault Corridor' }
+      { src: '/cctv_indian_hospital_admissions.jpg', title: 'ER Admissions & Triage Desk' },
+      { src: '/cctv_hospital_ward_view.jpg', title: 'Intensive Care Unit & Ward Wing' },
+      { src: '/cctv_indian_society_lobby.jpg', title: 'Hospital Main Reception & Check-in' },
+      { src: '/cctv_indian_bank_vault.jpg', title: 'Pharmacy & Narcotics Safe Vault' }
     ]
   },
   {
@@ -76,10 +76,10 @@ export const SOLUTIONS_DATA = [
       'Enables centralized multi-branch oversight from regional banking headquarters.'
     ],
     applications: [
-      { src: '/cctv_bank_view.jpg', title: 'Banking Hall & Teller Desks' },
-      { src: '/cctv_atm_view.jpg', title: '24/7 Self-Service ATM Lobby' },
-      { src: '/app_bank_branch1.jpg', title: 'Cashier Transaction Counter' },
-      { src: '/app_bank_branch2.jpg', title: 'Central Financial Command' }
+      { src: '/cctv_indian_bank_hall.jpg', title: 'Banking Hall & Teller Desks' },
+      { src: '/cctv_indian_atm_kiosk.jpg', title: '24/7 Self-Service ATM Kiosk' },
+      { src: '/cctv_indian_cash_counter.jpg', title: 'Cashier Transaction & Currency Counter' },
+      { src: '/cctv_indian_bank_vault.jpg', title: 'High-Security Bank Safe Strongroom' }
     ]
   },
   {
@@ -102,10 +102,10 @@ export const SOLUTIONS_DATA = [
       'Protects perimeter boundaries against trespassers with long-range thermal tripwires.'
     ],
     applications: [
-      { src: '/cctv_industrial_view.jpg', title: 'Logistics Warehouse Aisle' },
-      { src: '/cctv_outdoor_1.jpg', title: 'Perimeter Speed Dome View' },
-      { src: '/cctv_outdoor_2.jpg', title: 'Heavy Freight Gate ANPR' },
-      { src: '/cctv_industrial_1.jpg', title: 'Manufacturing Assembly Line' }
+      { src: '/cctv_industrial_view.jpg', title: 'High-Bay Logistics Warehouse' },
+      { src: '/triple_cctv_pole_system.jpg', title: 'Perimeter Speed Dome Pole Array' },
+      { src: '/hero_slide2_makeinindia.jpg', title: 'Manufacturing Shop Floor' },
+      { src: '/cctv_indian_society_gate.jpg', title: 'Main Freight Gate & Weighbridge ANPR' }
     ]
   },
   {
@@ -128,10 +128,10 @@ export const SOLUTIONS_DATA = [
       'Provides property management with centralized multi-tower VMS monitoring.'
     ],
     applications: [
-      { src: '/cctv_residential_view.jpg', title: 'Residential Main Gate ANPR' },
-      { src: '/cctv_residential_park_view.jpg', title: 'Community Park & Playground' },
-      { src: '/cctv_hotel_1.jpg', title: 'Residential Lobby Atrium' },
-      { src: '/cctv_hotel_2.jpg', title: 'Underground Parking Garage' }
+      { src: '/cctv_indian_society_gate.jpg', title: 'Society Main Gate & ANPR Barrier' },
+      { src: '/cctv_indian_society_park.jpg', title: 'Society Park & Walking Track' },
+      { src: '/cctv_indian_society_lobby.jpg', title: 'Tower Ground Lobby & Elevators' },
+      { src: '/cctv_indian_society_parking.jpg', title: 'Multi-Level Basement Car Parking' }
     ]
   },
   {
@@ -154,10 +154,10 @@ export const SOLUTIONS_DATA = [
       'Enhances public safety during emergency evacuations with centralized VMS alert linkage.'
     ],
     applications: [
-      { src: '/cctv_commercial_view.jpg', title: 'Grand Atrium 360 View' },
-      { src: '/cctv_commercial_1.jpg', title: 'Shopping Promenade Hall' },
-      { src: '/cctv_commercial_2.jpg', title: 'Multi-Level Mall Parking' },
-      { src: '/cctv_hotel_1.jpg', title: 'Corporate Tower Lobby' }
+      { src: '/cctv_commercial_view.jpg', title: 'Grand Mall Atrium 360 View' },
+      { src: '/cctv_commercial_1.jpg', title: 'Commercial Promenade Hall' },
+      { src: '/cctv_indian_society_parking.jpg', title: 'Multi-Level Commercial Parking' },
+      { src: '/cctv_indian_society_lobby.jpg', title: 'Corporate Tower Lobby & Lifts' }
     ]
   },
   {
@@ -180,7 +180,7 @@ export const SOLUTIONS_DATA = [
       'Provides foot traffic and queue length analytics to optimize store staffing.'
     ],
     applications: [
-      { src: '/cctv_retail_view.jpg', title: 'POS Cashier Checkout Desk' },
+      { src: '/cctv_indian_cash_counter.jpg', title: 'POS Cashier & Billing Counter' },
       { src: '/cctv_commercial_1.jpg', title: 'Franchise Storefront Entrance' },
       { src: '/cctv_industrial_view.jpg', title: 'Store Stockroom & Loading Bay' },
       { src: '/cctv_commercial_2.jpg', title: 'Regional Cloud VMS Dashboard' }
