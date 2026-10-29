@@ -1,4 +1,10 @@
-const mongoose = require('mongoose');
+let mongoose = null;
+try {
+  mongoose = require('mongoose');
+} catch (e) {
+  mongoose = null;
+}
+
 const fs = require('fs');
 const path = require('path');
 
@@ -15,7 +21,7 @@ const DB_PATH = path.join(__dirname, '../data/db.json');
 let isConnected = false;
 
 function isMongoConnected() {
-  return isConnected && mongoose.connection.readyState === 1;
+  return Boolean(mongoose && isConnected && mongoose.connection.readyState === 1);
 }
 
 async function seedFromLocalDb() {
@@ -35,7 +41,7 @@ async function seedFromLocalDb() {
           role: local.admin.role || 'administrator',
           company: local.admin.company || 'LOOKMAN DISTRIBUTION PRIVATE LIMITED'
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     }
 
@@ -156,6 +162,13 @@ async function seedFromLocalDb() {
 }
 
 async function connectDB() {
+  if (!mongoose) {
+    console.warn('! Note: Mongoose is not installed in this environment yet.');
+    console.warn('  Run: npm install --prefix backend');
+    console.warn('  -> Using robust local JSON database fallback (backend/data/db.json). All features remain 100% active.');
+    return false;
+  }
+
   const uri = process.env.MONGODB_URI || DEFAULT_URI;
 
   try {
@@ -179,18 +192,19 @@ async function connectDB() {
   }
 }
 
-mongoose.connection.on('disconnected', () => {
-  isConnected = false;
-});
+if (mongoose && mongoose.connection) {
+  mongoose.connection.on('disconnected', () => {
+    isConnected = false;
+  });
 
-mongoose.connection.on('reconnected', () => {
-  isConnected = true;
-  console.log('✓ MongoDB Reconnected');
-});
+  mongoose.connection.on('reconnected', () => {
+    isConnected = true;
+    console.log('✓ MongoDB Reconnected');
+  });
+}
 
 module.exports = {
   connectDB,
   isMongoConnected,
   seedFromLocalDb
 };
-

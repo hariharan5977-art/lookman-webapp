@@ -1,15 +1,23 @@
-const mongoose = require('mongoose');
+let mongoose = null;
+try {
+  mongoose = require('mongoose');
+} catch (e) {
+  mongoose = null;
+}
 
-const solutionSchema = new mongoose.Schema({
-  id: { type: String, required: true, unique: true, index: true },
-  title: { type: String, required: true, trim: true },
-  category: { type: String, default: 'Enterprise Security', trim: true },
-  description: { type: String, default: '', trim: true },
-  image: { type: String, default: '' },
-  features: [{ type: String }]
-}, {
-  timestamps: true
-});
+if (!mongoose) {
+  module.exports = {};
+} else {
+  const solutionSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true, index: true },
+    title: { type: String, required: true, trim: true },
+    category: { type: String, default: 'Enterprise Security', trim: true },
+    description: { type: String, default: '', trim: true },
+    image: { type: String, default: '' },
+    features: [{ type: String }]
+  }, {
+    timestamps: true
+  });
 
-module.exports = mongoose.models.Solution || mongoose.model('Solution', solutionSchema);
-
+  module.exports = mongoose.models.Solution || mongoose.model('Solution', solutionSchema);
+}

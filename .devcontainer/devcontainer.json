@@ -17,7 +17,7 @@
     }
   },
   "postCreateCommand": "npm run install:all && npm run build",
-  "postStartCommand": "pkill -f 'node backend/server.js' || true; nohup node backend/server.js > /tmp/server.log 2>&1 &",
+  "postStartCommand": "npm install --prefix backend && (pkill -f 'node backend/server.js' || true); nohup node backend/server.js > /tmp/server.log 2>&1 &",
   "customizations": {
     "vscode": {
       "settings": {
