@@ -4,8 +4,10 @@ const path = require('path');
 const fs = require('fs');
 const dotenv = require('dotenv');
 
+dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
+const { connectDB, isMongoConnected } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const solutionRoutes = require('./routes/solutionRoutes');
@@ -13,6 +15,11 @@ const inquiryRoutes = require('./routes/inquiryRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB Atlas (with seamless local fallback)
+connectDB().catch(err => {
+  console.warn('Initial MongoDB connect notice:', err.message);
+});
 
 // Middleware
 app.use(cors());
@@ -25,11 +32,16 @@ app.use('/api/products', productRoutes);
 app.use('/api/solutions', solutionRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 
-// Health check
+// Health check with DB status
 app.get('/api/health', (req, res) => {
+  const mongoActive = isMongoConnected();
   res.json({
     status: 'online',
-    service: 'Lookman Distribution API',
+    service: 'Lookman Distribution Full-Stack API',
+    database: {
+      engine: mongoActive ? 'MongoDB Atlas' : 'Local JSON Database (Fallback)',
+      mongoConnected: mongoActive
+    },
     timestamp: new Date().toISOString()
   });
 });
