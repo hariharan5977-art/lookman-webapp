@@ -12,57 +12,52 @@ export default function DayNightSection({ onOpenQuoteWithDetails }) {
   const environments = [
     {
       id: 0,
-      title: "Residential Villa & Living",
-      desc: "Vivid 4K color by day, crystal-clear starlight infrared tracking by night.",
+      title: "Residential Society & Main Gate",
+      cameraLabel: "CAM-01 • SOCIETY MAIN GATE ANPR",
+      desc: "Vivid 4K color by day, crystal-clear starlight infrared tracking by night across society gates.",
       icon: HomeIcon,
       images: [
-        "/day_vision_cctv.jpg",
-        "/night_vision_cctv.jpg",
-        "/hero_cctv_slide1.jpg",
+        "/cctv_indian_society_gate.jpg",
       ]
     },
     {
       id: 1,
-      title: "Perimeter Driveways & Patios",
-      desc: "Long-range thermal contrast detecting motion up to 150ft in pitch darkness.",
+      title: "Society Parks & Walking Tracks",
+      cameraLabel: "CAM-08 • SOCIETY PARK & PLAYGROUND",
+      desc: "Wide-angle surveillance detecting motion across society parks, walking tracks, and play areas.",
       icon: Sun,
       images: [
-        "/day_vision_cctv.jpg",
-        "/hero_cctv_slide1.jpg",
-        "/night_vision_cctv.jpg",
+        "/cctv_indian_society_park.jpg",
       ]
     },
     {
       id: 2,
-      title: "Commercial Storefronts & Parking",
-      desc: "License plate recognition and high-contrast night vision for retail security.",
+      title: "Tower Lobbies & Lift Access",
+      cameraLabel: "CAM-01 • RESIDENTIAL TOWER LOBBY",
+      desc: "Crystal-clear facial recognition and visitor verification at residential tower lobbies and elevators.",
       icon: Building2,
       images: [
-        "/hero_cctv_slide2.jpg",
-        "/day_vision_cctv.jpg",
-        "/night_vision_cctv.jpg",
+        "/cctv_indian_society_lobby.jpg",
       ]
     },
     {
       id: 3,
-      title: "Warehouse & Logistics Hubs",
-      desc: "24/7 continuous low-light monitoring for high-value inventory vaults.",
+      title: "Multi-Level Basement Parking",
+      cameraLabel: "CAM-07 • B1 BASEMENT CAR PARKING",
+      desc: "High-contrast HDR night vision eliminating blind spots across numbered bays and driving ramps.",
       icon: Shield,
       images: [
-        "/action360_slide2.jpg",
-        "/day_vision_cctv.jpg",
-        "/night_vision_cctv.jpg",
+        "/cctv_indian_society_parking.jpg",
       ]
     },
     {
       id: 4,
       title: "School & Campus Grounds",
-      desc: "Zero motion blur 60 FPS night capture for outdoor walkways and fields.",
+      cameraLabel: "CAM-01 • SCHOOL MAIN ENTRANCE",
+      desc: "Zero motion blur 60 FPS surveillance for student gates, bus bays, and campus walkways.",
       icon: GraduationCap,
       images: [
-        "/day_vision_cctv.jpg",
-        "/night_vision_cctv.jpg",
-        "/hero_cctv_slide1.jpg",
+        "/cctv_indian_school_gate.jpg",
       ]
     }
   ];
@@ -138,6 +133,26 @@ export default function DayNightSection({ onOpenQuoteWithDetails }) {
                   <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#e73455] text-white font-extrabold flex items-center justify-center shadow-lg border-2 border-white text-xs pointer-events-none">
                     ↔
                   </div>
+                </div>
+
+                {/* Day / Night CCTV badges */}
+                <div className="absolute top-3 left-3 z-20 flex items-center gap-2 pointer-events-none">
+                  <span className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider uppercase bg-black/80 text-white backdrop-blur-md flex items-center gap-1.5 border border-white/10 shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    {currentEnv.cameraLabel || 'LIVE CCTV'}
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 z-20 pointer-events-none">
+                  <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-black/70 text-amber-300 backdrop-blur-sm border border-amber-500/30">
+                    ☀ 4K DAY COLOR
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 right-3 z-20 pointer-events-none">
+                  <span className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-black/70 text-emerald-300 backdrop-blur-sm border border-emerald-500/30">
+                    🌙 STARLIGHT NIGHT VISION
+                  </span>
                 </div>
               </div>
 
