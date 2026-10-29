@@ -85,7 +85,16 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
 
   useEffect(() => {
     fetchAdminData();
-  }, [user]);
+    const handleUpdate = () => fetchAdminData();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('lookman_inquiries_updated', handleUpdate);
+      window.addEventListener('lookman_products_updated', handleUpdate);
+      return () => {
+        window.removeEventListener('lookman_inquiries_updated', handleUpdate);
+        window.removeEventListener('lookman_products_updated', handleUpdate);
+      };
+    }
+  }, [user, activeTab]);
 
   const fetchAdminData = async () => {
     setLoadingData(true);

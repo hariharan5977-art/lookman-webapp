@@ -159,53 +159,69 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
     e.preventDefault();
     setStatus({ loading: true, success: false, error: '' });
 
-    // Build structured summary
-    let solutionTag = 'General CCTV Quote';
-    let structuredNotes = '';
-
-    if (selectionMode === 'products') {
-      const selectedEquipment = EQUIPMENT_OPTIONS
-        .filter(eq => (quantities[eq.id] || 0) > 0)
-        .map(eq => ({ ...eq, qty: quantities[eq.id] }));
-
-      if (selectedEquipment.length > 0) {
-        solutionTag = `Equipment: ${selectedEquipment.map(eq => `${eq.qty}x ${eq.code}`).join(', ')}`;
-        structuredNotes = `[SELECTED EQUIPMENT & QUANTITIES]\n` +
-          selectedEquipment.map(eq => `• ${eq.name} (${eq.code}): ${eq.qty} units`).join('\n') +
-          `\nTotal Equipment: ${totalEquipmentQty} units\n\n`;
-      } else {
-        solutionTag = 'Camera Equipment Inquiry';
-      }
-    } else {
-      if (selectedAreas.length > 0) {
-        solutionTag = `Installation: ${selectedAreas.join(', ')} (${areaCameraCount} Cams)`;
-        structuredNotes = `[INSTALLATION AREA & FACILITY]\n` +
-          `• Target Area(s): ${selectedAreas.join(', ')}\n` +
-          `• Estimated Camera Count: ${areaCameraCount} cameras\n\n`;
-      } else {
-        solutionTag = `Facility Installation (${areaCameraCount} Cams)`;
-        structuredNotes = `[INSTALLATION REQUIREMENT]\n• Estimated Camera Count: ${areaCameraCount} cameras\n\n`;
-      }
-    }
-
-    const finalMessage = `${structuredNotes}${formData.message ? `[CLIENT MESSAGE]\n${formData.message}` : ''}`.trim();
-
-    const payload = {
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      company: formData.company.trim(),
-      solution: solutionTag,
-      message: finalMessage,
-      selectionMode,
-      selectedProducts: equipmentList
-        .filter(eq => (quantities[eq.id] || 0) > 0)
-        .map(eq => ({ id: eq.id, name: eq.name, code: eq.code, qty: quantities[eq.id] })),
-      selectedAreas,
-      cameraCount: selectionMode === 'products' ? totalEquipmentQty : areaCameraCount
-    };
-
     try {
+      // Build structured summary
+      let solutionTag = 'General CCTV Quote';
+      let structuredNotes = '';
+
+      if (selectionMode === 'products') {
+        const selectedEquipment = equipmentList
+          .filter(eq => (quantities[eq.id] || 0) > 0)
+          .map(eq => ({ ...eq, qty: quantities[eq.id] }));
+
+        if (selectedEquipment.length > 0) {
+          solutionTag = `Equipment: ${selectedEquipment.map(eq => `${eq.qty}x ${eq.code}`).join(', ')}`;
+          structuredNotes = `[SELECTED EQUIPMENT & QUANTITIES]\n` +
+            selectedEquipment.map(eq => `• ${eq.name} (${eq.code}): ${eq.qty} units`).join('\n') +
+            `\nTotal Equipment: ${totalEquipmentQty} units\n\n`;
+        } else {
+          solutionTag = 'Camera Equipment Inquiry';
+        }
+      } else {
+        if (selectedAreas.length > 0) {
+          solutionTag = `Installation: ${selectedAreas.join(', ')} (${areaCameraCount} Cams)`;
+          structuredNotes = `[INSTALLATION AREA & FACILITY]\n` +
+            `• Target Area(s): ${selectedAreas.join(', ')}\n` +
+            `• Estimated Camera Count: ${areaCameraCount} cameras\n\n`;
+        } else {
+          solutionTag = `Facility Installation (${areaCameraCount} Cams)`;
+          structuredNotes = `[INSTALLATION REQUIREMENT]\n• Estimated Camera Count: ${areaCameraCount} cameras\n\n`;
+        }
+      }
+
+      const finalMessage = `${structuredNotes}${formData.message ? `[CLIENT MESSAGE]\n${formData.message}` : ''}`.trim();
+
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        company: formData.company.trim(),
+        solution: solutionTag,
+        message: finalMessage,
+        selectionMode,
+        selectedProducts: equipmentList
+          .filter(eq => (quantities[eq.id] || 0) > 0)
+          .map(eq => ({ id: eq.id, name: eq.name, code: eq.code, qty: quantities[eq.id] })),
+        selectedAreas,
+        cameraCount: selectionMode === 'products' ? totalEquipmentQty : areaCameraCount
+      };
+
+      // Always also save to local storage immediately so it appears instantly in admin panel
+      try {
+        const localInqs = JSON.parse(localStorage.getItem('lookman_inquiries') || '[]');
+        localInqs.unshift({
+          ...payload,
+          id: 'inq_' + Date.now(),
+          createdAt: new Date().toISOString()
+        });
+        localStorage.setItem('lookman_inquiries', JSON.stringify(localInqs));
+        if (typeof window !== 'undefined' && window.dispatchEvent) {
+          window.dispatchEvent(new Event('lookman_inquiries_updated'));
+        }
+      } catch (e) {
+        // Local storage warning
+      }
+
       const res = await fetch(`${API_BASE}/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -215,25 +231,13 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
 
       if (data.success) {
         setStatus({ loading: false, success: true, error: '' });
-        return;
       } else {
         setStatus({ loading: false, success: false, error: data.message || 'Submission failed' });
-        return;
       }
     } catch (err) {
-      // Offline fallback: save locally
-      try {
-        const localInqs = JSON.parse(localStorage.getItem('lookman_inquiries') || '[]');
-        localInqs.unshift({
-          ...payload,
-          id: 'inq_' + Date.now(),
-          createdAt: new Date().toISOString()
-        });
-        localStorage.setItem('lookman_inquiries', JSON.stringify(localInqs));
-        setStatus({ loading: false, success: true, error: '' });
-      } catch (storageErr) {
-        setStatus({ loading: false, success: true, error: '' });
-      }
+      console.warn('Network inquiry error, saved to local cache:', err);
+      // Saved locally in the try block above, treat as success for user
+      setStatus({ loading: false, success: true, error: '' });
     }
   };
 
