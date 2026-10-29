@@ -13,7 +13,7 @@ const Solution = require('../models/Solution');
 const Category = require('../models/Category');
 const DeletedItem = require('../models/DeletedItem');
 
-const DEFAULT_URI = 'mongodb+srv://harilkm65_db_user:harilkm65_db_user@cluster0.n1vq1ll.mongodb.net/lookman?retryWrites=true&w=majority';
+const DEFAULT_URI = 'mongodb+srv://harilkm65_db_user:ZG4jcj2Do33VqOcM@cluster0.n1vq1ll.mongodb.net/lookman?retryWrites=true&w=majority';
 const DB_PATH = path.join(__dirname, '../data/db.json');
 
 async function runMigration() {
@@ -190,3 +190,4 @@ runMigration().catch(err => {
   console.error('Migration failed:', err);
   process.exit(1);
 });
+

@@ -23,3 +23,4 @@ const inquirySchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.models.Inquiry || mongoose.model('Inquiry', inquirySchema);
+

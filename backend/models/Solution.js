@@ -12,3 +12,4 @@ const solutionSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.models.Solution || mongoose.model('Solution', solutionSchema);
+
