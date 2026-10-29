@@ -121,8 +121,25 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
 
     // Merge deleted product tombstones
     const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
-    const allDeleted = [...new Set([...localDeleted, ...backendDeleted])];
-    if (backendDeleted.length > 0) {
+    let allDeleted = [...new Set([...localDeleted, ...backendDeleted])];
+
+    // Purge active backend products from deleted tombstones so stale local items never hide database products
+    if (prods && prods.length > 0) {
+      const activeBackendKeys = new Set();
+      prods.forEach(p => {
+        if (p.id) activeBackendKeys.add(String(p.id).toLowerCase().trim());
+        if (p.model) activeBackendKeys.add(String(p.model).toLowerCase().trim());
+        if (p.productCode) activeBackendKeys.add(String(p.productCode).toLowerCase().trim());
+        if (p.name) activeBackendKeys.add(String(p.name).toLowerCase().trim());
+        if (p.slug) activeBackendKeys.add(String(p.slug).toLowerCase().trim());
+        const stripped = String(p.model || p.productCode || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (stripped) activeBackendKeys.add(stripped);
+      });
+      allDeleted = allDeleted.filter(d => {
+        const dl = String(d || '').toLowerCase().trim();
+        const dlStripped = dl.replace(/[^a-z0-9]/g, '');
+        return !activeBackendKeys.has(dl) && !activeBackendKeys.has(dlStripped);
+      });
       localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(allDeleted));
     }
 
@@ -145,14 +162,16 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     };
 
     const isDeleted = (p) => {
-      const pid = String(p.id || '').toLowerCase();
-      const pmodel = String(p.model || '').toLowerCase();
-      const pname = String(p.name || '').toLowerCase();
-      const pslug = String(p.slug || '').toLowerCase();
+      if (!p) return false;
+      const pid = String(p.id || '').toLowerCase().trim();
+      const pmodel = String(p.model || '').toLowerCase().trim();
+      const pcode = String(p.productCode || '').toLowerCase().trim();
+      const pname = String(p.name || '').toLowerCase().trim();
+      const pslug = String(p.slug || '').toLowerCase().trim();
       return allDeleted.some(d => {
         if (!d) return false;
-        const dl = String(d).toLowerCase();
-        return dl === pid || dl === pmodel || dl === pname || dl === pslug;
+        const dl = String(d).toLowerCase().trim();
+        return dl === pid || dl === pmodel || dl === pcode || dl === pname || dl === pslug;
       });
     };
 
@@ -172,32 +191,67 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
 
     const obsoleteCodes = [
       'CO-IP-401FDA', 'CO-IP-201FDMA', 'CO-PTZ-8032AI', 'CO-PTZ-2025AI', 
-      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE'
+      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE',
+      'CO-IP-4AIFDS', 'CO-IP-2AIFDRA', 'CO-PTZ-8R12AI'
     ];
     const isObsoleteSample = (p) => {
       if (!p) return false;
       const m = String(p.model || p.productCode || p.id || '').toUpperCase().trim();
-      return obsoleteCodes.includes(m);
+      return obsoleteCodes.some(c => m.includes(c));
     };
 
-    // 3. Merge products with custom products & all catalog products, strictly filtering out Secura, obsolete & deleted items
+    // 3. Merge products: custom products first, then backend products, with fallback to ALL_LOOKMAN_PRODUCTS
     const rawCustom = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
     const cleanedCustom = rawCustom.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
     if (cleanedCustom.length !== rawCustom.length) {
       localStorage.setItem('lookman_custom_products', JSON.stringify(cleanedCustom));
     }
 
-    const customProds = cleanedCustom.filter(p => !isDeleted(p) && !isSecuraSerial(p) && !isObsoleteSample(p));
-    const baseProds = (prods.length > 0 ? prods : ALL_LOOKMAN_PRODUCTS).filter(p => !isDeleted(p) && !isSecuraSerial(p) && !isObsoleteSample(p));
+    // Purge custom products from allDeleted so user imports/adds are never suppressed
+    if (cleanedCustom.length > 0) {
+      const customKeys = new Set();
+      cleanedCustom.forEach(p => {
+        if (p.id) customKeys.add(String(p.id).toLowerCase().trim());
+        if (p.model) customKeys.add(String(p.model).toLowerCase().trim());
+        if (p.productCode) customKeys.add(String(p.productCode).toLowerCase().trim());
+        if (p.name) customKeys.add(String(p.name).toLowerCase().trim());
+        if (p.slug) customKeys.add(String(p.slug).toLowerCase().trim());
+        const stripped = String(p.model || p.productCode || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (stripped) customKeys.add(stripped);
+      });
+      allDeleted = allDeleted.filter(d => {
+        const dl = String(d || '').toLowerCase().trim();
+        const dlStripped = dl.replace(/[^a-z0-9]/g, '');
+        return !customKeys.has(dl) && !customKeys.has(dlStripped);
+      });
+      localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(allDeleted));
+    }
+
+    const customProds = cleanedCustom;
+    const activeBackendProds = prods.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
 
     const combined = [...customProds];
-    baseProds.forEach(bp => {
-      const bpModel = (bp.model || bp.name || '').toLowerCase();
-      const already = combined.some(cp => String(cp.id) === String(bp.id) || (cp.model && cp.model.toLowerCase() === bpModel) || (cp.name && cp.name.toLowerCase() === bpModel));
+    activeBackendProds.forEach(bp => {
+      const bpModel = (bp.model || bp.productCode || bp.name || '').toLowerCase().trim();
+      const bpId = String(bp.id || '');
+      const already = combined.some(cp => 
+        (bpId && String(cp.id) === bpId) || 
+        (bpModel && (cp.model || cp.productCode || '').toLowerCase().trim() === bpModel) || 
+        (bpModel && (cp.name || '').toLowerCase().trim() === bpModel)
+      );
       if (!already) {
         combined.push(bp);
       }
     });
+
+    // If still empty (e.g. backend offline & no custom products), use ALL_LOOKMAN_PRODUCTS baseline
+    if (combined.length === 0) {
+      ALL_LOOKMAN_PRODUCTS.forEach(bp => {
+        if (!isSecuraSerial(bp) && !isObsoleteSample(bp)) {
+          combined.push(bp);
+        }
+      });
+    }
 
     setInquiries(mergedInquiries);
     setProductsList(combined);
@@ -927,13 +981,28 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
 
     // Un-mark any imported models/IDs from lookman_deleted_product_ids
     const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
-    const importedSet = new Set(
-      formattedProducts.flatMap(p => [String(p.id).toLowerCase(), (p.model || '').toLowerCase(), (p.name || '').toLowerCase()])
-    );
-    const cleanDeleted = localDeleted.filter(d => !importedSet.has(String(d).toLowerCase()));
+    const importedIdentifiers = new Set();
+    formattedProducts.forEach(p => {
+      if (p.id) importedIdentifiers.add(String(p.id).toLowerCase().trim());
+      if (p.model) importedIdentifiers.add(String(p.model).toLowerCase().trim());
+      if (p.productCode) importedIdentifiers.add(String(p.productCode).toLowerCase().trim());
+      if (p.name) importedIdentifiers.add(String(p.name).toLowerCase().trim());
+      if (p.slug) importedIdentifiers.add(String(p.slug).toLowerCase().trim());
+      const stripped = String(p.model || p.productCode || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (stripped) importedIdentifiers.add(stripped);
+    });
+
+    const cleanDeleted = localDeleted.filter(d => {
+      const dl = String(d || '').toLowerCase().trim();
+      const dlStripped = dl.replace(/[^a-z0-9]/g, '');
+      return !importedIdentifiers.has(dl) && !importedIdentifiers.has(dlStripped);
+    });
     localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(cleanDeleted));
 
     localStorage.setItem('lookman_custom_products', JSON.stringify(updatedCustom));
+
+    // Immediately display imported products in the live catalog
+    setProductsList(updatedCustom);
 
     setAddSuccessMsg(`🎉 Successfully imported and published ${formattedProducts.length} products from datasheet to live website!`);
     setTimeout(() => setAddSuccessMsg(''), 7000);

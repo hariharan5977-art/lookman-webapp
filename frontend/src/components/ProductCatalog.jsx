@@ -304,14 +304,15 @@ export default function ProductCatalog({
     const sourceList = (products && products.length > 0) ? products : ALL_LOOKMAN_PRODUCTS;
     const obsoleteCodes = [
       'CO-IP-401FDA', 'CO-IP-201FDMA', 'CO-PTZ-8032AI', 'CO-PTZ-2025AI', 
-      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE'
+      'CO-NVR-0432AI', 'CO-NVR-0216', 'CO-XVR-1615L', 'CO-SW-0802POE',
+      'CO-IP-4AIFDS', 'CO-IP-2AIFDRA', 'CO-PTZ-8R12AI'
     ];
     return sourceList.filter(p => {
       if (!p) return false;
       const m = String(p.model || p.name || p.productCode || p.id || '').toUpperCase().trim();
       const b = String(p.brand || '').toLowerCase().trim();
       const isSecura = m.startsWith('SIP-') || m.startsWith('SHD-') || m.startsWith('SNVR-') || m.startsWith('SXVR-') || b === 'secura';
-      const isObsolete = obsoleteCodes.includes(m);
+      const isObsolete = obsoleteCodes.some(c => m.includes(c));
       return !isSecura && !isObsolete;
     }).map(p => {
       let cleanDesc = (p.description || p.title || '').replace(/\[\/?et_pb_[^\]]*\]/g, '').replace(/<[^>]*>/g, '').trim();
