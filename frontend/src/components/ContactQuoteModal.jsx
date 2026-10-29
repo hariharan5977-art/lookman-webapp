@@ -128,6 +128,25 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  const handleResetForm = () => {
+    setStatus({ loading: false, success: false, error: '' });
+    setFormData({ name: '', email: '', phone: '', company: '', message: '' });
+    setQuantities({});
+    setSelectedAreas([]);
+    setAreaCameraCount(4);
+    onClose();
+  };
+
+  // Auto-close success modal after 4 seconds
+  useEffect(() => {
+    if (status.success) {
+      const timer = setTimeout(() => {
+        handleResetForm();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [status.success]);
+
   if (!isOpen) return null;
 
   const handleQuantityChange = (productId, delta) => {
@@ -240,25 +259,6 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
       setStatus({ loading: false, success: true, error: '' });
     }
   };
-
-  const handleResetForm = () => {
-    setStatus({ loading: false, success: false, error: '' });
-    setFormData({ name: '', email: '', phone: '', company: '', message: '' });
-    setQuantities({});
-    setSelectedAreas([]);
-    setAreaCameraCount(4);
-    onClose();
-  };
-
-  // Auto-close success modal after 4 seconds
-  useEffect(() => {
-    if (status.success) {
-      const timer = setTimeout(() => {
-        handleResetForm();
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [status.success]);
 
   return (
     <div 
