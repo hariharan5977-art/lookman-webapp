@@ -250,6 +250,16 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
     onClose();
   };
 
+  // Auto-close success modal after 4 seconds
+  useEffect(() => {
+    if (status.success) {
+      const timer = setTimeout(() => {
+        handleResetForm();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [status.success]);
+
   return (
     <div 
       id="contact-modal" 
@@ -271,36 +281,52 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
           <X size={20} />
         </button>
 
-        {/* Modal Header */}
-        <div className="mb-4 pr-8 space-y-1">
-          <span className="text-[10px] font-bold text-[#ea0004] uppercase tracking-wider font-mono bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200 inline-block">
-            Lookman Official Quotation Desk
-          </span>
-          <h3 className="text-xl sm:text-2xl font-black text-[#101f46] tracking-tight">
-            Request a Custom CCTV Quote
-          </h3>
-          <p className="text-xs text-slate-500">
-            Select specific camera quantities with <strong className="text-slate-700">+ and -</strong>, or pick your installation area for customized system sizing.
-          </p>
-        </div>
+        {/* Modal Header - Only shown when building quote, hidden on success */}
+        {!status.success && (
+          <div className="mb-4 pr-8 space-y-1">
+            <span className="text-[10px] font-bold text-[#ea0004] uppercase tracking-wider font-mono bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200 inline-block">
+              Lookman Official Quotation Desk
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-[#101f46] tracking-tight">
+              Request a Custom CCTV Quote
+            </h3>
+            <p className="text-xs text-slate-500">
+              Select specific camera quantities with <strong className="text-slate-700">+ and -</strong>, or pick your installation area for customized system sizing.
+            </p>
+          </div>
+        )}
 
         {status.success ? (
-          <div className="py-10 text-center space-y-4 animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-300">
-              <CheckCircle2 size={36} />
+          <div className="py-8 sm:py-12 text-center space-y-4 animate-in zoom-in-95 duration-200">
+            {/* Small Notification Label */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold font-mono">
+              <CheckCircle2 size={14} className="text-emerald-600" />
+              <span>Quote Submitted Successfully</span>
             </div>
-            <h4 className="text-xl font-bold text-[#101f46]">Quote Request Received!</h4>
-            <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-              Thank you for choosing Lookman. Our CCTV technical engineers will analyze your specifications and respond with wholesale project pricing within 24 hours.
-            </p>
-            <button 
-              type="button"
-              onClick={handleResetForm}
-              className="text-white font-heading text-xs font-bold py-2.5 px-6 rounded-full shadow-md cursor-pointer hover:opacity-95 transition-all"
-              style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
-            >
-              Close Window
-            </button>
+
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-300 shadow-sm">
+              <CheckCircle2 size={34} />
+            </div>
+
+            <div className="space-y-1 max-w-md mx-auto">
+              <h4 className="text-xl sm:text-2xl font-heading font-black text-[#101f46]">
+                Quote Request Received!
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Thank you for choosing Lookman. Our technical team has received your project details and will follow up with wholesale pricing shortly.
+              </p>
+            </div>
+
+            <div className="pt-2">
+              <button 
+                type="button"
+                onClick={handleResetForm}
+                className="text-white font-heading text-xs font-bold py-2.5 px-8 rounded-full shadow-md cursor-pointer hover:opacity-95 transition-all"
+                style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
+              >
+                Close Window
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1">
