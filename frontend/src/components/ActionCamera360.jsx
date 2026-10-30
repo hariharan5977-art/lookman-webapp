@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Camera, ShieldAlert, UserCheck, MotionTargetIcon, Play, Pause, Activity } from './Icons';
 import useScrollReveal from '../hooks/useScrollReveal';
 
@@ -9,50 +9,46 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
   const [showAiOverlay, setShowAiOverlay] = useState(true);
   const videoRef = useRef(null);
 
+  // Single Indian Society CCTV Video Feed
+  const INDIAN_SOCIETY_VIDEO = "/videos/indian_society_cctv.mp4";
+  const INDIAN_SOCIETY_POSTER = "/cctv_indian_society_gate.jpg";
+
   const AI_FEATURES = [
     {
       id: 'face',
       title: "AI Face Detection & Recognition",
-      tag: "Biometric 99.2% Accuracy",
-      desc: "Real-time facial landmark scanning, multi-face tracking, VIP/blocklist alerts, and touchless attendance verification.",
+      tag: "Biometric 99.4% Accuracy",
+      desc: "Instant facial landmark scanning on guards and residents with VIP whitelist verification and touchless gate authorization.",
       icon: UserCheck,
-      videoSrc: "/videos/sol_commercial.mp4",
-      fallbackImage: "/cctv_indian_society_lobby.jpg",
       cameraLabel: "CAM-01 • AI FACIAL BIOMETRIC SCANNER",
-      stats: { latency: "8 ms", confidence: "99.2%", target: "Face & Biometrics", status: "VERIFIED" }
+      stats: { latency: "8 ms", confidence: "99.4%", target: "Face & Biometrics", status: "VERIFIED" }
     },
     {
       id: 'anpr',
       title: "Number Plate Recognition (ANPR / LPR)",
-      tag: "Automated Barrier Linkage",
+      tag: "Automated Boom Barrier",
       desc: "High-speed optical OCR license plate scanner capturing Indian number plates in motion with automated boom barrier opening.",
       icon: Camera,
-      videoSrc: "/videos/sol_community.mp4",
-      fallbackImage: "/cctv_indian_society_gate.jpg",
-      cameraLabel: "CAM-04 • ANPR HIGH-SPEED LPR SENSOR",
-      stats: { latency: "12 ms", confidence: "99.4%", target: "Indian Plate OCR", status: "AUTHORIZED" }
+      cameraLabel: "CAM-01 • ANPR HIGH-SPEED LPR SENSOR",
+      stats: { latency: "12 ms", confidence: "99.6%", target: "Indian Plate OCR", status: "AUTHORIZED" }
     },
     {
       id: 'restriction',
       title: "Area Restriction & Perimeter Defense",
       tag: "Active Deterrence Sirens",
-      desc: "Custom virtual polygonal restricted zones and directional tripwires triggering instant strobe sirens and guard room alerts.",
+      desc: "Virtual polygonal restricted entry zones and directional tripwires triggering instant strobe sirens and guard room alerts.",
       icon: ShieldAlert,
-      videoSrc: "/videos/sol_community.mp4",
-      fallbackImage: "/cctv_indian_society_parking.jpg",
-      cameraLabel: "CAM-02 • RESTRICTED ZONE TRIPWIRE",
-      stats: { latency: "5 ms", confidence: "99.7%", target: "Perimeter Breach", status: "ALERT TRIGGERED" }
+      cameraLabel: "CAM-01 • RESTRICTED ZONE TRIPWIRE",
+      stats: { latency: "5 ms", confidence: "99.7%", target: "Perimeter Breach", status: "ACTIVE FENCE" }
     },
     {
       id: 'classification',
       title: "Human & Vehicle Target Classification",
       tag: "Zero False Alarms",
-      desc: "Deep-learning target classifier distinguishing humans and vehicles from pets, rain, shadows, and swaying tree foliage.",
+      desc: "Deep-learning target classifier distinguishing humans, cars, and two-wheelers while filtering swaying palm trees, rain, and shadows.",
       icon: MotionTargetIcon,
-      videoSrc: "/videos/sol_school.mp4",
-      fallbackImage: "/cctv_indian_society_park.jpg",
-      cameraLabel: "CAM-08 • DEEP LEARNING TARGET VCA",
-      stats: { latency: "10 ms", confidence: "98.9%", target: "Human / Vehicle", status: "ACTIVE FILTER" }
+      cameraLabel: "CAM-01 • DEEP LEARNING TARGET VCA",
+      stats: { latency: "10 ms", confidence: "99.2%", target: "Human / Vehicle", status: "ACTIVE FILTER" }
     }
   ];
 
@@ -76,33 +72,32 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
         <div className="bg-white border border-slate-200/60 rounded-none overflow-hidden shadow-xs w-full lg:aspect-[28/9]">
           <div className="flex flex-col lg:flex-row w-full h-full items-stretch justify-center overflow-hidden">
 
-            {/* Left Column: Live AI Video Feed with Dynamic Overlays */}
+            {/* Left Column: Single Indian Society CCTV Video with Real-Time AI Overlays */}
             <div className={`relative w-full lg:w-[58%] aspect-[16/10] sm:aspect-[16/9] lg:aspect-auto lg:h-full min-h-[260px] sm:min-h-[320px] shrink-0 overflow-hidden bg-slate-950 select-none group ${isVisible ? 'anim-card-slide-left' : 'opacity-0'}`}>
               
-              {/* HTML5 Live CCTV Video Loop */}
+              {/* SINGLE CONTINUOUS INDIAN SOCIETY CCTV VIDEO LOOP (Does not reload when switching tabs) */}
               <video
-                key={currentFeature.id}
                 ref={videoRef}
-                src={currentFeature.videoSrc}
-                poster={currentFeature.fallbackImage}
+                src={INDIAN_SOCIETY_VIDEO}
+                poster={INDIAN_SOCIETY_POSTER}
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className="w-full h-full object-cover"
               />
 
-              {/* Subtle CRT / Security Scanline Texture */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/40 pointer-events-none" />
+              {/* Security CCTV Scanlines & Ambient Lighting */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-black/35 pointer-events-none" />
 
-              {/* Top Security CCTV Status Header */}
+              {/* Top Security Header with Live Indicator & Interactive Overlay Controls */}
               <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider uppercase bg-black/80 text-white backdrop-blur-md flex items-center gap-1.5 border border-white/10 shadow-sm">
+                  <span className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider uppercase bg-black/85 text-white backdrop-blur-md flex items-center gap-1.5 border border-white/10 shadow-sm">
                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                     LIVE
                   </span>
-                  <span className="hidden sm:inline-flex px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wider uppercase bg-black/70 text-slate-200 backdrop-blur-md border border-white/10">
+                  <span className="hidden sm:inline-flex px-2.5 py-1 rounded-md text-[11px] font-semibold tracking-wider uppercase bg-black/75 text-slate-200 backdrop-blur-md border border-white/10">
                     {currentFeature.cameraLabel}
                   </span>
                 </div>
@@ -110,8 +105,8 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
                 <div className="flex items-center gap-2 pointer-events-auto">
                   <button
                     onClick={() => setShowAiOverlay(!showAiOverlay)}
-                    className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider uppercase bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/15 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-                    title="Toggle AI Bounding Box Overlays"
+                    className="px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider uppercase bg-black/80 hover:bg-black text-white backdrop-blur-md border border-white/15 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    title="Toggle AI Target Bounding Boxes"
                   >
                     <Activity size={12} className={showAiOverlay ? "text-emerald-400" : "text-gray-400"} />
                     <span className="hidden sm:inline">AI Overlay:</span>
@@ -122,7 +117,7 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
 
                   <button
                     onClick={togglePlayPause}
-                    className="w-7 h-7 rounded-md bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/15 flex items-center justify-center transition-all shadow-sm cursor-pointer"
+                    className="w-7 h-7 rounded-md bg-black/80 hover:bg-black text-white backdrop-blur-md border border-white/15 flex items-center justify-center transition-all shadow-sm cursor-pointer"
                     title={isPlaying ? "Pause Video" : "Play Video"}
                   >
                     {isPlaying ? <Pause size={13} /> : <Play size={13} className="ml-0.5" />}
@@ -130,159 +125,188 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
                 </div>
               </div>
 
-              {/* DYNAMIC AI FEATURE OVERLAYS (Applied based on selected feature) */}
+              {/* DYNAMIC AI SCENARIO OVERLAYS (Applied directly to the Indian Society Gate Video) */}
               {showAiOverlay && (
                 <div className="absolute inset-0 pointer-events-none z-10 transition-all duration-300">
 
-                  {/* ──────────────── 1. FACE DETECTION & RECOGNITION OVERLAY ──────────────── */}
+                  {/* ──────────────── 1. AI FACE DETECTION & RECOGNITION ──────────────── */}
                   {currentFeature.id === 'face' && (
                     <>
-                      {/* Primary Face Target Box */}
-                      <div className="absolute top-[28%] left-[44%] w-[22%] sm:w-[18%] aspect-square border-2 border-emerald-400/90 rounded-sm shadow-[0_0_15px_rgba(52,211,153,0.4)] transition-all duration-300">
+                      {/* Face Target 1: Indian Security Guard at Gate Booth */}
+                      <div className="absolute top-[54.8%] left-[41.1%] w-[3.0%] aspect-[3/4] border-2 border-emerald-400 rounded-xs shadow-[0_0_12px_rgba(52,211,153,0.5)]">
                         {/* Corner Reticles */}
-                        <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-emerald-300" />
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-emerald-300" />
-                        <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-emerald-300" />
-                        <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-emerald-300" />
+                        <span className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-emerald-300" />
+                        <span className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-emerald-300" />
+                        <span className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-emerald-300" />
+                        <span className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-emerald-300" />
 
                         {/* Animated Laser Scanning Beam */}
-                        <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_8px_#34d399] animate-pulse" style={{ top: '45%' }} />
+                        <div className="absolute inset-x-0 h-0.5 bg-emerald-300 shadow-[0_0_6px_#34d399] animate-pulse" style={{ top: '45%' }} />
 
                         {/* Top Detection Tag */}
-                        <div className="absolute -top-6 left-0 px-1.5 py-0.5 bg-emerald-500/90 text-black text-[10px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap shadow-sm">
-                          FACE DETECTED 99.2%
+                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-emerald-500 text-black text-[8px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap shadow-sm">
+                          FACE: 99.4%
                         </div>
 
-                        {/* Floating Biometric HUD Info Card */}
-                        <div className="absolute top-full mt-2 left-0 min-w-[140px] bg-black/85 backdrop-blur-md border border-emerald-400/40 rounded p-2 text-white text-[10px] space-y-0.5 shadow-lg">
+                        {/* Floating Biometric Detail Card Pinned to Guard */}
+                        <div className="absolute top-full mt-2 -left-20 sm:-left-24 min-w-[155px] bg-black/90 backdrop-blur-md border border-emerald-400/50 rounded p-2 text-white text-[10px] space-y-0.5 shadow-xl">
                           <div className="flex justify-between items-center text-emerald-400 font-bold border-b border-white/10 pb-1 mb-1">
-                            <span>ID #IN-8492</span>
-                            <span className="text-[9px] bg-emerald-500/20 px-1 rounded">MATCH</span>
+                            <span>ID: #SEC-409</span>
+                            <span className="text-[9px] bg-emerald-500/20 px-1 py-0.5 rounded text-emerald-300">STAFF MATCH</span>
                           </div>
-                          <div className="text-slate-300">Target: <span className="text-white font-medium">Resident Verified</span></div>
-                          <div className="text-slate-300">Confidence: <span className="text-emerald-400 font-bold">99.2%</span></div>
-                          <div className="text-slate-300">Access: <span className="text-emerald-400 font-bold">GRANTED</span></div>
+                          <div className="text-slate-300">Name: <span className="text-white font-medium">Ram Singh (Gate Guard)</span></div>
+                          <div className="text-slate-300">Auth: <span className="text-emerald-400 font-bold">Duty Security Officer</span></div>
+                          <div className="text-slate-300">Access: <span className="text-emerald-400 font-bold">AUTHORIZED</span></div>
                         </div>
                       </div>
 
-                      {/* Secondary Face Tracking in background */}
-                      <div className="absolute top-[32%] left-[18%] w-[15%] sm:w-[12%] aspect-square border border-dashed border-cyan-400/70 rounded-xs">
-                        <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-cyan-600/80 text-white text-[9px] font-bold uppercase tracking-wider rounded-xs whitespace-nowrap">
-                          SCANNING 96.4%
+                      {/* Face Target 2: Walking Resident in Background */}
+                      <div className="absolute top-[44.5%] left-[51.3%] w-[2.2%] aspect-[3/4] border border-cyan-400/90 rounded-xs shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+                        <span className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-cyan-300" />
+                        <span className="absolute -top-1 -right-1 w-1.5 h-1.5 border-t border-r border-cyan-300" />
+                        <span className="absolute -bottom-1 -left-1 w-1.5 h-1.5 border-b border-l border-cyan-300" />
+                        <span className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-cyan-300" />
+
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-1 py-0.5 bg-cyan-600 text-white text-[7px] font-bold uppercase tracking-wider rounded-xs whitespace-nowrap">
+                          RESIDENT: 98.9%
+                        </div>
+
+                        <div className="absolute -bottom-14 left-0 min-w-[125px] bg-black/85 backdrop-blur-md border border-cyan-400/40 rounded p-1.5 text-white text-[9px] space-y-0.5 shadow-md hidden sm:block">
+                          <div className="text-cyan-300 font-bold">Flat B-402 • Tower B</div>
+                          <div className="text-slate-300">Pedestrian Gate: <span className="text-emerald-400 font-semibold">UNLOCKED</span></div>
                         </div>
                       </div>
                     </>
                   )}
 
-                  {/* ──────────────── 2. NUMBER PLATE RECOGNITION (ANPR / LPR) OVERLAY ──────────────── */}
+                  {/* ──────────────── 2. NUMBER PLATE RECOGNITION (ANPR / LPR) ──────────────── */}
                   {currentFeature.id === 'anpr' && (
                     <>
-                      {/* Vehicle Bounding Box */}
-                      <div className="absolute top-[26%] left-[32%] w-[48%] sm:w-[42%] aspect-[16/10] border border-white/40 rounded-sm">
-                        <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-blue-600/90 text-white text-[9px] font-bold tracking-wider rounded-xs">
-                          VEHICLE [SUV] 98.9%
+                      {/* Vehicle Bounding Box Tracking White Brezza SUV */}
+                      <div className="absolute top-[51.5%] left-[51.2%] w-[19.2%] h-[33.0%] border-2 border-white/60 rounded-sm">
+                        <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-blue-600 text-white text-[8px] font-bold tracking-wider rounded-xs">
+                          VEHICLE [SUV] 99.5%
                         </div>
 
-                        {/* High-Precision License Plate Scanner Box */}
-                        <div className="absolute bottom-[16%] left-[22%] w-[42%] h-[26%] border-2 border-emerald-400 rounded-sm shadow-[0_0_18px_rgba(52,211,153,0.5)]">
+                        {/* High-Precision License Plate Reticle on SER04B6224 */}
+                        <div className="absolute top-[75.0%] left-[18.0%] w-[33.0%] h-[12.5%] border-2 border-emerald-400 rounded-xs shadow-[0_0_15px_rgba(52,211,153,0.6)]">
                           {/* Corner Reticles */}
-                          <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-emerald-200" />
-                          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-emerald-200" />
-                          <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-emerald-200" />
-                          <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-emerald-200" />
+                          <span className="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-emerald-200" />
+                          <span className="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-emerald-200" />
+                          <span className="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-emerald-200" />
+                          <span className="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-emerald-200" />
 
-                          {/* Sweeping Laser Scanner Bar */}
-                          <div className="absolute inset-x-0 h-0.5 bg-emerald-300 shadow-[0_0_8px_#34d399] animate-pulse" style={{ top: '50%' }} />
+                          {/* Sweeping Laser OCR Scanner */}
+                          <div className="absolute inset-x-0 h-0.5 bg-emerald-300 shadow-[0_0_6px_#34d399] animate-pulse" style={{ top: '48%' }} />
 
-                          {/* ANPR Live Tag */}
-                          <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
-                            ANPR OCR: 99.4%
+                          {/* ANPR Tag */}
+                          <div className="absolute -top-4 left-0 px-1 py-0.5 bg-emerald-500 text-black text-[7px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
+                            ANPR OCR: 99.6%
                           </div>
                         </div>
 
-                        {/* Floating Plate Data Readout Card */}
-                        <div className="absolute -right-36 top-2 hidden sm:block min-w-[150px] bg-black/90 backdrop-blur-md border border-emerald-400/50 rounded p-2.5 text-white text-[10px] space-y-1 shadow-xl">
-                          <div className="text-[11px] font-black text-amber-300 font-mono tracking-widest border-b border-white/10 pb-1">
-                            DL 4C AF 4943
+                        {/* Floating Indian Number Plate Readout HUD Card */}
+                        <div className="absolute -right-36 sm:-right-44 top-4 min-w-[165px] bg-black/90 backdrop-blur-md border border-emerald-400/50 rounded p-2.5 text-white text-[10px] space-y-1 shadow-2xl">
+                          {/* Styled Indian Number Plate Badge */}
+                          <div className="flex items-center border border-white/20 rounded bg-white text-black font-mono font-black overflow-hidden shadow-sm">
+                            <span className="bg-[#003399] text-white px-1.5 py-0.5 text-[8px] font-sans font-bold flex flex-col items-center">
+                              <span>IND</span>
+                            </span>
+                            <span className="px-2 py-0.5 text-[11px] tracking-widest text-[#111]">
+                              SER 04 B 6224
+                            </span>
                           </div>
-                          <div className="text-slate-300">State: <span className="text-white font-medium">Delhi (DL)</span></div>
-                          <div className="text-slate-300">Auth: <span className="text-emerald-400 font-bold">Resident Whitelist</span></div>
-                          <div className="text-slate-300">Gate: <span className="text-emerald-400 font-bold">BARRIER OPEN</span></div>
+
+                          <div className="text-slate-300 pt-0.5">Model: <span className="text-white font-medium">Maruti Suzuki Vitara Brezza</span></div>
+                          <div className="text-slate-300">Resident: <span className="text-white font-medium">Akshaya Heights • Flat B-402</span></div>
+                          <div className="text-slate-300">FastTag / RFID: <span className="text-emerald-400 font-bold">MATCHED (#FT-8891)</span></div>
+                          <div className="text-slate-300 border-t border-white/10 pt-1">
+                            Action: <span className="text-emerald-400 font-bold">BARRIER LIFT COMMAND SENT</span>
+                          </div>
                         </div>
                       </div>
                     </>
                   )}
 
-                  {/* ──────────────── 3. AREA RESTRICTION & INTRUSION TRIPWIRE OVERLAY ──────────────── */}
+                  {/* ──────────────── 3. AREA RESTRICTION & PERIMETER DEFENSE ──────────────── */}
                   {currentFeature.id === 'restriction' && (
                     <>
-                      {/* Polygon Restricted Zone Box */}
-                      <div className="absolute top-[22%] left-[16%] w-[68%] h-[58%] border-2 border-dashed border-red-500/80 bg-red-500/10 rounded-sm shadow-[0_0_25px_rgba(239,68,68,0.3)]">
+                      {/* Virtual Restricted Entry Zone Polygon */}
+                      <div className="absolute top-[56.0%] left-[27.0%] w-[58.0%] h-[36.0%] border-2 border-dashed border-red-500/80 bg-red-500/10 rounded-sm shadow-[0_0_25px_rgba(239,68,68,0.3)]">
                         
-                        {/* Zone Header Banner */}
-                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-sm flex items-center gap-1.5 animate-pulse">
+                        {/* Zone Header Alert Banner */}
+                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-red-600 text-white text-[9px] font-black uppercase tracking-wider rounded shadow-sm flex items-center gap-1.5 animate-pulse">
                           <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                          RESTRICTED ZONE INTRUSION DETECTED
+                          VIRTUAL PERIMETER FENCE ARMED
                         </div>
 
-                        {/* Diagonal Tripwire Laser Line */}
-                        <div className="absolute top-1/2 -left-4 -right-4 h-0.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-600 shadow-[0_0_12px_#ef4444]" />
+                        {/* Animated Laser Tripwire across Boom Barrier arm */}
+                        <div 
+                          className="absolute h-1 bg-gradient-to-r from-red-600 via-amber-300 to-red-600 shadow-[0_0_12px_#ef4444]"
+                          style={{
+                            top: '44%',
+                            left: '17%',
+                            width: '80%',
+                            transform: 'rotate(5.5deg)'
+                          }}
+                        />
 
-                        {/* Tripwire Directional Indicator */}
-                        <div className="absolute top-[52%] left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black/85 text-amber-300 text-[9px] font-mono font-bold uppercase rounded border border-amber-500/40">
-                          ◄ TRIPWIRE BREACH: DIRECTION A → B ►
-                        </div>
-
-                        {/* Intruder Target Box */}
-                        <div className="absolute top-[25%] left-[58%] w-[20%] h-[55%] border-2 border-red-500 rounded-sm animate-pulse">
-                          <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase tracking-wider rounded-xs whitespace-nowrap">
-                            INTRUDER ALERT
-                          </div>
+                        {/* Directional Indicator */}
+                        <div className="absolute top-[52%] left-1/2 -translate-x-1/2 px-2 py-0.5 bg-black/90 text-amber-300 text-[8px] font-mono font-bold uppercase rounded border border-amber-500/40">
+                          ◄ VEHICLE ENTRY TRIPWIRE: DIRECTION A → B ►
                         </div>
 
                         {/* Active Security Linkage Status */}
                         <div className="absolute bottom-2 left-2 right-2 bg-black/90 backdrop-blur-md border border-red-500/40 rounded px-2.5 py-1.5 text-white text-[10px] flex items-center justify-between">
-                          <span className="text-red-400 font-bold">Linkage: Active Siren ON • Flashing Strobe ACTIVE</span>
-                          <span className="text-slate-300 font-mono">Response: Guard Room Notified</span>
+                          <span className="text-red-400 font-bold">Linkage: 110dB Audio Siren ARMED • Barrier Interlock ENGAGED</span>
+                          <span className="text-slate-300 font-mono hidden sm:inline">Guard Booth & VMS Notified</span>
                         </div>
                       </div>
                     </>
                   )}
 
-                  {/* ──────────────── 4. HUMAN & VEHICLE TARGET CLASSIFICATION OVERLAY ──────────────── */}
+                  {/* ──────────────── 4. HUMAN & VEHICLE TARGET CLASSIFICATION ──────────────── */}
                   {currentFeature.id === 'classification' && (
                     <>
-                      {/* Human Target 1 */}
-                      <div className="absolute top-[22%] left-[26%] w-[18%] sm:w-[14%] h-[60%] border-2 border-cyan-400 rounded-sm shadow-[0_0_12px_rgba(34,211,238,0.4)]">
-                        <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-cyan-500 text-black text-[9px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
-                          HUMAN 99.1%
-                        </div>
-                        <div className="absolute bottom-1 left-1 right-1 bg-black/80 text-[8px] text-cyan-300 font-mono px-1 py-0.5 rounded text-center">
-                          Dwell: 14s
+                      {/* Target 1: Security Guard (Human) */}
+                      <div className="absolute top-[54.2%] left-[39.8%] w-[5.0%] h-[30.0%] border-2 border-cyan-400 rounded-xs shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+                        <div className="absolute -top-4 left-0 px-1 py-0.5 bg-cyan-500 text-black text-[7px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
+                          HUMAN: 99.2%
                         </div>
                       </div>
 
-                      {/* Human Target 2 */}
-                      <div className="absolute top-[25%] left-[44%] w-[16%] sm:w-[13%] h-[56%] border-2 border-cyan-400 rounded-sm shadow-[0_0_12px_rgba(34,211,238,0.4)]">
-                        <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-cyan-500 text-black text-[9px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
-                          HUMAN 98.4%
+                      {/* Target 2: Walking Resident (Human) */}
+                      <div className="absolute top-[44.0%] left-[50.4%] w-[3.0%] h-[15.5%] border-2 border-cyan-400 rounded-xs shadow-[0_0_10px_rgba(34,211,238,0.4)]">
+                        <div className="absolute -top-4 left-0 px-1 py-0.5 bg-cyan-500 text-black text-[7px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
+                          HUMAN: 98.7%
                         </div>
                       </div>
 
-                      {/* Vehicle Target */}
-                      <div className="absolute top-[34%] left-[64%] w-[32%] sm:w-[28%] h-[42%] border-2 border-amber-400 rounded-sm shadow-[0_0_12px_rgba(251,191,36,0.4)]">
-                        <div className="absolute -top-5 left-0 px-1.5 py-0.5 bg-amber-500 text-black text-[9px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
-                          VEHICLE 98.7%
-                        </div>
-                        <div className="absolute bottom-1 left-1 bg-black/80 text-[8px] text-amber-300 font-mono px-1.5 py-0.5 rounded">
-                          Speed: 14 km/h
+                      {/* Target 3: White Brezza Car (Vehicle - SUV) */}
+                      <div className="absolute top-[51.5%] left-[51.2%] w-[19.2%] h-[33.0%] border-2 border-amber-400 rounded-xs shadow-[0_0_12px_rgba(251,191,36,0.4)]">
+                        <div className="absolute -top-4 left-0 px-1 py-0.5 bg-amber-500 text-black text-[7px] font-black uppercase tracking-wider rounded-xs whitespace-nowrap">
+                          VEHICLE [CAR]: 99.5%
                         </div>
                       </div>
 
-                      {/* False Alarm Filter Badge at bottom */}
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/85 backdrop-blur-md border border-white/15 rounded-full text-white text-[10px] font-medium flex items-center gap-1.5 shadow-md">
+                      {/* Target 4: Parked Bike Left (Vehicle - Two Wheeler) */}
+                      <div className="absolute top-[58.0%] left-[0.2%] w-[7.2%] h-[23.5%] border border-purple-400 rounded-xs">
+                        <div className="absolute -top-4 left-0 px-1 py-0.5 bg-purple-600 text-white text-[7px] font-bold uppercase tracking-wider rounded-xs whitespace-nowrap">
+                          MOTORCYCLE: 98.1%
+                        </div>
+                      </div>
+
+                      {/* Target 5: Parked Bike Center (Vehicle - Two Wheeler) */}
+                      <div className="absolute top-[47.0%] left-[43.4%] w-[5.2%] h-[15.5%] border border-purple-400 rounded-xs">
+                        <div className="absolute -top-4 left-0 px-1 py-0.5 bg-purple-600 text-white text-[7px] font-bold uppercase tracking-wider rounded-xs whitespace-nowrap">
+                          MOTORCYCLE: 97.8%
+                        </div>
+                      </div>
+
+                      {/* False Alarm Filter Pill at bottom */}
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/90 backdrop-blur-md border border-white/15 rounded-full text-white text-[10px] font-medium flex items-center gap-1.5 shadow-md whitespace-nowrap">
                         <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                        <span>False Alarm Filter: <strong className="text-emerald-400">Trees, Rain & Shadows Ignored</strong></span>
+                        <span>AI Filter: <strong className="text-emerald-400">Trees, Wind & Shadows Ignored (Zero False Alarms)</strong></span>
                       </div>
                     </>
                   )}
@@ -291,10 +315,10 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
 
               {/* Bottom Camera Telemetry Bar */}
               <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none text-white text-[10px] font-mono">
-                <div className="px-2 py-1 rounded bg-black/75 backdrop-blur-sm border border-white/10 hidden sm:block">
+                <div className="px-2 py-1 rounded bg-black/80 backdrop-blur-sm border border-white/10 hidden sm:block">
                   AI ENGINE: <span className="text-emerald-400 font-bold">NEURAL VPU 4.0</span> • LATENCY: <span className="text-white font-bold">{currentFeature.stats.latency}</span>
                 </div>
-                <div className="px-2 py-1 rounded bg-black/75 backdrop-blur-sm border border-white/10 ml-auto">
+                <div className="px-2 py-1 rounded bg-black/80 backdrop-blur-sm border border-white/10 ml-auto">
                   ACCURACY: <span className="text-emerald-400 font-bold">{currentFeature.stats.confidence}</span>
                 </div>
               </div>
@@ -333,7 +357,6 @@ export default function ActionCamera360({ onOpenQuoteWithDetails }) {
                           key={feature.id}
                           onClick={() => {
                             setActiveTab(idx);
-                            setIsPlaying(true);
                           }}
                           className={`flex items-start gap-3.5 py-2.5 px-3.5 text-left transition-all cursor-pointer border-l-[3px] rounded-r-lg relative z-10 ${isActive
                             ? 'border-l-[#e73455] bg-white shadow-xs font-semibold'
