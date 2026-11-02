@@ -811,7 +811,7 @@ export default function ProductCatalog({
                 </div>
 
                 {/* Key Features Section */}
-                {selectedProductDetail.keyFeatures && selectedProductDetail.keyFeatures.length > 0 && (
+                {Array.isArray(selectedProductDetail.keyFeatures) && selectedProductDetail.keyFeatures.length > 0 && (
                   <div className="pt-6 border-t border-slate-100 text-left">
                     <div className="flex items-center gap-2 pb-3 mb-3 border-b border-slate-100">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#ea0004]" />

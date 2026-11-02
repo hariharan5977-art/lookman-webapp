@@ -86,10 +86,14 @@ export default function ContactQuoteModal({ isOpen, onClose, initialDetails, pro
       // Check if matches an equipment model
       let matchedModel = null;
       for (const eq of equipmentList) {
+        if (!eq) continue;
+        const c = String(eq.code || '').toLowerCase();
+        const n = String(eq.name || '').toLowerCase();
+        const id = String(eq.id || '').toLowerCase();
         if (
-          lower.includes(eq.code.toLowerCase()) || 
-          lower.includes(eq.name.toLowerCase()) || 
-          lower.includes(String(eq.id).toLowerCase())
+          (c && lower.includes(c)) || 
+          (n && lower.includes(n)) || 
+          (id && lower.includes(id))
         ) {
           matchedModel = eq.id;
           break;

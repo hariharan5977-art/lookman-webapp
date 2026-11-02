@@ -484,7 +484,13 @@ export default function App() {
   };
 
   const handleOpenQuoteWithDetails = (detailsMsg) => {
-    setQuoteDetails(typeof detailsMsg === 'string' ? detailsMsg : '');
+    let msg = '';
+    if (typeof detailsMsg === 'string') {
+      msg = detailsMsg;
+    } else if (detailsMsg && typeof detailsMsg === 'object') {
+      msg = detailsMsg.notes || detailsMsg.message || detailsMsg.title || (detailsMsg.category ? `Inquiry for ${detailsMsg.category}` : '');
+    }
+    setQuoteDetails(msg);
     setContactOpen(true);
   };
 
