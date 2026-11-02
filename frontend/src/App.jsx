@@ -563,9 +563,9 @@ export default function App() {
                   }')`,
                   backgroundPosition:
                     viewMode === 'contact'
-                      ? 'right 38%'
+                      ? 'center center'
                       : viewMode === 'solutions'
-                      ? 'right 20%'
+                      ? 'center center'
                       : viewMode === 'catalog'
                       ? 'center center'
                       : viewMode === 'brands'
@@ -614,7 +614,7 @@ export default function App() {
               />
             )}
 
-            {(viewMode === 'catalog' || viewMode === 'solutions' || viewMode === 'about' || viewMode === 'contact' || viewMode === 'brands') && (
+            {(viewMode === 'catalog' || viewMode === 'solutions' || viewMode === 'about' || viewMode === 'brands') && (
               <div className={`w-full max-w-[2000px] mx-auto pt-10 sm:pt-16 pb-2 select-none ${
                 viewMode === 'about' ? 'wide-2000-flush' : 'wide-2000-symmetric'
               }`}>
@@ -636,9 +636,7 @@ export default function App() {
                       ? 'Solutions'
                       : viewMode === 'about'
                       ? 'About Us'
-                      : viewMode === 'brands'
-                      ? 'Brands'
-                      : 'Contact'}
+                      : 'Brands'}
                   </h1>
                 </div>
               </div>
