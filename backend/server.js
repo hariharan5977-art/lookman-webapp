@@ -49,9 +49,20 @@ app.get('/api/health', (req, res) => {
 // Serve frontend static build in production
 const frontendDistPath = path.join(__dirname, '../frontend/dist');
 if (fs.existsSync(frontendDistPath)) {
-  app.use(express.static(frontendDistPath));
+  app.use(express.static(frontendDistPath, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+      }
+    }
+  }));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) return next();
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(frontendDistPath, 'index.html'));
   });
 }
