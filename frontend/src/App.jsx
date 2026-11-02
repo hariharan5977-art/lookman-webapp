@@ -550,20 +550,20 @@ export default function App() {
                 style={{
                   backgroundImage: `url('${
                     viewMode === 'catalog'
-                      ? '/products_hero_bg.png'
+                      ? '/products_showcase_hero_v3.png'
                       : viewMode === 'solutions'
-                      ? '/solutions_architects_hero.webp'
+                      ? '/solutions_consulting_hero_v3.webp'
                       : viewMode === 'brands'
                       ? '/brands_hero_bg.png'
                       : viewMode === 'contact'
-                      ? '/contact_hero_bg.webp'
+                      ? '/contact_support_hero_v3.webp'
                       : viewMode === 'about'
                       ? '/about_corporate_hero.webp'
                       : '/hero_light_slide1.jpg'
                   }')`,
                   backgroundPosition:
                     viewMode === 'contact'
-                      ? 'center center'
+                      ? 'center top'
                       : viewMode === 'solutions'
                       ? 'center center'
                       : viewMode === 'catalog'
