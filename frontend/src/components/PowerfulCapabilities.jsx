@@ -7,7 +7,7 @@ export default function PowerfulCapabilities() {
     {
       iconImg: "/exact_icon_realtime.png",
       title: 'Real-Time Monitoring',
-      desc: 'Real-Time Monitoring'
+      desc: 'Live high-definition streaming with zero latency.'
     },
     {
       iconImg: "/exact_icon_motion.png",
@@ -263,15 +263,14 @@ export default function PowerfulCapabilities() {
           </div>
 
           {/* 3-Column Desktop Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-center pt-1 relative z-10 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 xl:gap-8 items-center pt-1 relative z-10">
 
             {/* Left Column - 3 Feature Cards (Clean Light Theme Cards) */}
-            <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-5 py-1 ${isVisible ? 'anim-card-slide-left' : 'opacity-0'}`}>
+            <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-5 py-1 relative z-20 ${isVisible ? 'anim-card-slide-left' : 'opacity-0'}`}>
               {leftCapabilities.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#ff2d55]/50 hover:-translate-y-1 ${idx === 0 || idx === 2 ? 'lg:translate-x-5' : 'lg:-translate-x-2'
-                    }`}
+                  className="capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#ff2d55]/50 hover:-translate-y-1 relative z-20"
                   style={{
                     animation: `orbit-minimal-${idx + 1} ${6.5 + idx * 0.9}s ease-in-out infinite`,
                     animationDelay: `-${idx * 1.6}s`
@@ -289,24 +288,23 @@ export default function PowerfulCapabilities() {
               ))}
             </div>
 
-            {/* Center Column - Camera Pole Visual (Reduced Size) */}
-            <div className="lg:col-span-4 flex flex-col items-center justify-center relative min-h-[340px] sm:min-h-[380px] py-1">
+            {/* Center Column - Camera Pole Visual (Proportional & Non-Overlapping) */}
+            <div className="lg:col-span-4 flex flex-col items-center justify-center relative min-h-[320px] sm:min-h-[360px] py-1 pointer-events-none sm:pointer-events-auto">
               <div className="relative z-10 flex flex-col items-center justify-end w-full h-full mt-auto">
                 <img
                   src="/exact_user_camera_cleaned.png"
                   alt="Multi-camera CCTV surveillance system"
-                  className="w-full max-w-[290px] sm:max-w-[340px] lg:max-w-[380px] h-auto object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-103 mt-auto"
+                  className="w-full max-w-[210px] sm:max-w-[245px] lg:max-w-[270px] xl:max-w-[295px] h-auto object-contain filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-103 mt-auto select-none"
                 />
               </div>
             </div>
 
             {/* Right Column - 3 Feature Cards (Clean Light Theme Cards) */}
-            <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-5 py-1 ${isVisible ? 'anim-card-slide-right' : 'opacity-0'}`}>
+            <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-5 py-1 relative z-20 ${isVisible ? 'anim-card-slide-right' : 'opacity-0'}`}>
               {rightCapabilities.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#38bdf8]/50 hover:-translate-y-1 ${idx === 0 || idx === 2 ? 'lg:-translate-x-5' : 'lg:translate-x-2'
-                    }`}
+                  className="capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#38bdf8]/50 hover:-translate-y-1 relative z-20"
                   style={{
                     animation: `orbit-minimal-${((idx + 2) % 4) + 1} ${7.2 + idx * 0.8}s ease-in-out infinite`,
                     animationDelay: `-${(idx + 2) * 1.4}s`
