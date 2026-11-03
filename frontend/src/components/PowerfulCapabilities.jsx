@@ -104,6 +104,16 @@ export default function PowerfulCapabilities() {
     };
   }, [isVisible]);
 
+  const c0 = wirePoints?.cards[0];
+  const c1 = wirePoints?.cards[1];
+  const c2 = wirePoints?.cards[2];
+  const c3 = wirePoints?.cards[3];
+  const c4 = wirePoints?.cards[4];
+  const c5 = wirePoints?.cards[5];
+  const camL = wirePoints?.camLeft ?? 500;
+  const camR = wirePoints?.camRight ?? 780;
+  const camCY = wirePoints?.camCenterY ?? 210;
+
   return (
     <section ref={capRef} className="capabilities-section w-full bg-[#f8f9fc] relative overflow-hidden py-1 sm:py-2 border-none flex justify-center">
       {/* Whole Tab Container */}
@@ -136,16 +146,16 @@ export default function PowerfulCapabilities() {
             </h2>
           </div>
 
-          {/* 3-Column Desktop Grid Layout with Dynamic Connected Circuit Lines */}
+          {/* 3-Column Desktop Grid Layout */}
           <div
             ref={gridRef}
             className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 xl:gap-8 items-center pt-1 relative z-10 overflow-visible"
           >
 
             {/* =========================================================================
-                DYNAMIC RUNNING MATRIX BUS LINES DIRECTLY LOCKED TO CARDS & CAMERA
+                AUTHENTIC DIGITAL MATRIX BUS LINES WITH ORIGINAL RUNNING PULSE STYLE
                 ========================================================================= */}
-            {wirePoints && wirePoints.cards[0] && (
+            {wirePoints && c0 && c1 && c2 && c3 && c4 && c5 && (
               <svg
                 className="absolute inset-0 w-full h-full pointer-events-none select-none z-0 hidden lg:block overflow-visible"
                 width={wirePoints.width}
@@ -153,283 +163,201 @@ export default function PowerfulCapabilities() {
                 viewBox={`0 0 ${wirePoints.width} ${wirePoints.height}`}
               >
                 <defs>
-                  {/* Neon Glow Filter */}
-                  <filter id="circuit-neon-glow" x="-30%" y="-30%" width="160%" height="160%">
-                    <feGaussianBlur stdDeviation="3.5" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-
-                  {/* Dual Neon Gradients */}
+                  {/* Original Double Shade Gradient (Neon Rose/Red to Vibrant Electric Azure/Cyan) */}
                   <linearGradient id="matrix-grad-left" x1="100%" y1="50%" x2="0%" y2="50%">
                     <stop offset="0%" stopColor="#ff2d55" stopOpacity="1" />
-                    <stop offset="50%" stopColor="#a855f7" stopOpacity="0.95" />
+                    <stop offset="45%" stopColor="#a855f7" stopOpacity="0.95" />
                     <stop offset="100%" stopColor="#38bdf8" stopOpacity="1" />
                   </linearGradient>
                   <linearGradient id="matrix-grad-right" x1="0%" y1="50%" x2="100%" y2="50%">
                     <stop offset="0%" stopColor="#ff2d55" stopOpacity="1" />
-                    <stop offset="50%" stopColor="#a855f7" stopOpacity="0.95" />
+                    <stop offset="45%" stopColor="#a855f7" stopOpacity="0.95" />
                     <stop offset="100%" stopColor="#38bdf8" stopOpacity="1" />
                   </linearGradient>
                 </defs>
 
-                {/* === CAMERA CENTRAL MOUNT JUNCTION BUS === */}
-                <g strokeWidth="2" strokeLinecap="round" fill="none">
-                  <line
-                    x1={wirePoints.camCenterX}
-                    y1={wirePoints.camCenterY - 45}
-                    x2={wirePoints.camCenterX}
-                    y2={wirePoints.camCenterY + 45}
+                {/* DYNAMIC MATRIX DATA CONDUITS (Orthogonal Double Shade Matrix Bus) */}
+                <g strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter" fill="none">
+                  {/* === LEFT MATRIX CHANNELS (Camera to Left Cards) === */}
+                  {/* Channel 1A: Top Matrix Bus to Real-Time Monitoring */}
+                  <path
+                    d={`M ${camL + 40},${camCY - 45} H ${c0.x + 40} V ${c0.y} H ${c0.x}`}
+                    pathLength="100"
                     stroke="url(#matrix-grad-left)"
-                    strokeOpacity="0.4"
+                    className="circuit-grow-lead"
                   />
-                  {/* Glowing center hub dot */}
-                  <circle
-                    cx={wirePoints.camCenterX}
-                    cy={wirePoints.camCenterY}
-                    r="4"
-                    fill="#ff2d55"
-                    stroke="#ffffff"
-                    strokeWidth="1.5"
-                    className="animate-pulse"
+                  {/* Channel 1B: Parallel Micro-Trace */}
+                  <path
+                    d={`M ${camL + 40},${camCY - 60} H ${c0.x + 60} V ${c0.y - 25} H ${c0.x + 20}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-mid"
+                  />
+                  {/* Channel 1C: Matrix Step Branch */}
+                  <path
+                    d={`M ${c0.x + 40},${Math.round((camCY - 45 + c0.y) / 2)} H ${c0.x + 80} V ${c0.y + 15} H ${c0.x + 10}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-sub"
+                  />
+
+                  {/* Channel 2A: Middle Matrix Bus to Motion Detection (Bowed Outwards) */}
+                  <path
+                    d={`M ${camL + 30},${c1.y} H ${c1.x + 70} V ${c1.y - 12} H ${c1.x + 30} V ${c1.y} H ${c1.x}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-mid"
+                  />
+                  {/* Channel 2B: Parallel Micro-Trace */}
+                  <path
+                    d={`M ${camL + 30},${c1.y + 16} H ${c1.x + 50} V ${c1.y + 24} H ${c1.x + 20}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-trail"
+                  />
+                  {/* Channel 2C: Cross-Grid Matrix Spur */}
+                  <path
+                    d={`M ${c1.x + 70},${c1.y - 12} V ${c1.y - 32} H ${c1.x + 40}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-lead"
+                  />
+
+                  {/* Channel 3A: Bottom Matrix Bus to Cloud Storage */}
+                  <path
+                    d={`M ${camL + 40},${camCY + 45} H ${c2.x + 40} V ${c2.y} H ${c2.x}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-lead"
+                  />
+                  {/* Channel 3B: Parallel Micro-Trace */}
+                  <path
+                    d={`M ${camL + 40},${camCY + 60} H ${c2.x + 60} V ${c2.y + 25} H ${c2.x + 20}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-trail"
+                  />
+                  {/* Channel 3C: Matrix Step Branch */}
+                  <path
+                    d={`M ${c2.x + 40},${Math.round((camCY + 45 + c2.y) / 2)} H ${c2.x + 80} V ${c2.y - 15} H ${c2.x + 10}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-left)"
+                    className="circuit-grow-mid"
+                  />
+
+                  {/* === RIGHT MATRIX CHANNELS (Camera to Right Cards) === */}
+                  {/* Channel 4A: Top Matrix Bus to Alarm Integration */}
+                  <path
+                    d={`M ${camR - 40},${camCY - 45} H ${c3.x - 40} V ${c3.y} H ${c3.x}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-lead"
+                  />
+                  {/* Channel 4B: Parallel Micro-Trace */}
+                  <path
+                    d={`M ${camR - 40},${camCY - 60} H ${c3.x - 60} V ${c3.y - 25} H ${c3.x - 20}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-mid"
+                  />
+                  {/* Channel 4C: Matrix Step Branch */}
+                  <path
+                    d={`M ${c3.x - 40},${Math.round((camCY - 45 + c3.y) / 2)} H ${c3.x - 80} V ${c3.y + 15} H ${c3.x - 10}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-sub"
+                  />
+
+                  {/* Channel 5A: Middle Matrix Bus to Remote Access (Bowed Outwards) */}
+                  <path
+                    d={`M ${camR - 30},${c4.y} H ${c4.x - 70} V ${c4.y - 12} H ${c4.x - 30} V ${c4.y} H ${c4.x}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-mid"
+                  />
+                  {/* Channel 5B: Parallel Micro-Trace */}
+                  <path
+                    d={`M ${camR - 30},${c4.y + 16} H ${c4.x - 50} V ${c4.y + 24} H ${c4.x - 20}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-trail"
+                  />
+                  {/* Channel 5C: Cross-Grid Matrix Spur */}
+                  <path
+                    d={`M ${c4.x - 70},${c4.y - 12} V ${c4.y - 32} H ${c4.x - 40}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-lead"
+                  />
+
+                  {/* Channel 6A: Bottom Matrix Bus to Multi-Camera View */}
+                  <path
+                    d={`M ${camR - 40},${camCY + 45} H ${c5.x - 40} V ${c5.y} H ${c5.x}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-lead"
+                  />
+                  {/* Channel 6B: Parallel Micro-Trace */}
+                  <path
+                    d={`M ${camR - 40},${camCY + 60} H ${c5.x - 60} V ${c5.y + 25} H ${c5.x - 20}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-trail"
+                  />
+                  {/* Channel 6C: Matrix Step Branch */}
+                  <path
+                    d={`M ${c5.x - 40},${Math.round((camCY + 45 + c5.y) / 2)} H ${c5.x - 80} V ${c5.y - 15} H ${c5.x - 10}`}
+                    pathLength="100"
+                    stroke="url(#matrix-grad-right)"
+                    className="circuit-grow-mid"
                   />
                 </g>
 
-                {/* =====================================================================
-                    LEFT CHANNELS: Camera -> Cards 0, 1, 2
-                    ===================================================================== */}
-                <g strokeLinecap="round" strokeLinejoin="round" fill="none">
-                  {/* Channel 0: Real-Time Monitoring (Top Left) */}
-                  {wirePoints.cards[0] && (
-                    <g key="ch-0">
-                      {/* Base Track (Always 100% visible connection) */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 35},${wirePoints.camCenterY - 45} H ${wirePoints.cards[0].x + 35} V ${wirePoints.cards[0].y} H ${wirePoints.cards[0].x}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="1.8"
-                        strokeOpacity="0.32"
-                      />
-                      {/* Running Pulse (Continuously flows into card) */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 35},${wirePoints.camCenterY - 45} H ${wirePoints.cards[0].x + 35} V ${wirePoints.cards[0].y} H ${wirePoints.cards[0].x}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="2.8"
-                        filter="url(#circuit-neon-glow)"
-                        className="circuit-pulse-running-lead"
-                      />
-                      {/* Secondary Decorative Micro-Line */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 50},${wirePoints.camCenterY - 60} H ${wirePoints.cards[0].x + 55} V ${wirePoints.cards[0].y - 12} H ${wirePoints.cards[0].x + 18}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.25"
-                      />
-                      {/* Camera Origin Node */}
-                      <circle cx={wirePoints.camLeft + 35} cy={wirePoints.camCenterY - 45} r="3.5" fill="#ff2d55" stroke="#ffffff" strokeWidth="1" />
-                    </g>
-                  )}
+                {/* MATRIX DATA NODES & SOLDER TERMINALS (At Card Margins with Double Shade Glow) */}
+                <g fill="#38bdf8" stroke="#ff2d55" strokeWidth="1.8">
+                  {/* Left Terminal Matrix Pads */}
+                  <circle cx={c0.x} cy={c0.y} r="4.5" className="node-pulse-lead" />
+                  <circle cx={c0.x + 20} cy={c0.y - 25} r="3.5" className="node-pulse-mid" />
+                  <circle cx={c0.x + 10} cy={c0.y + 15} r="3" className="node-pulse-trail" />
 
-                  {/* Channel 1: Motion Detection (Middle Left - Bowed Outwards) */}
-                  {wirePoints.cards[1] && (
-                    <g key="ch-1">
-                      {/* Base Track (Straight Laser Bus) */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 15},${wirePoints.cards[1].y} H ${wirePoints.cards[1].x}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="2.2"
-                        strokeOpacity="0.35"
-                      />
-                      {/* Running Pulse */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 15},${wirePoints.cards[1].y} H ${wirePoints.cards[1].x}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="3.2"
-                        filter="url(#circuit-neon-glow)"
-                        className="circuit-pulse-running-mid"
-                      />
-                      {/* Secondary Micro-Line */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 35},${wirePoints.cards[1].y + 14} H ${wirePoints.cards[1].x + 30} V ${wirePoints.cards[1].y + 14} H ${wirePoints.cards[1].x + 10}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.25"
-                      />
-                      {/* Camera Origin Node */}
-                      <circle cx={wirePoints.camLeft + 15} cy={wirePoints.cards[1].y} r="4" fill="#a855f7" stroke="#ffffff" strokeWidth="1" />
-                    </g>
-                  )}
+                  <circle cx={c1.x} cy={c1.y} r="4.5" className="node-pulse-mid" />
+                  <circle cx={c1.x + 20} cy={c1.y + 24} r="3.5" className="node-pulse-trail" />
+                  <circle cx={c1.x + 40} cy={c1.y - 32} r="3" className="node-pulse-lead" />
 
-                  {/* Channel 2: Cloud Storage (Bottom Left) */}
-                  {wirePoints.cards[2] && (
-                    <g key="ch-2">
-                      {/* Base Track */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 35},${wirePoints.camCenterY + 45} H ${wirePoints.cards[2].x + 35} V ${wirePoints.cards[2].y} H ${wirePoints.cards[2].x}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="1.8"
-                        strokeOpacity="0.32"
-                      />
-                      {/* Running Pulse */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 35},${wirePoints.camCenterY + 45} H ${wirePoints.cards[2].x + 35} V ${wirePoints.cards[2].y} H ${wirePoints.cards[2].x}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="2.8"
-                        filter="url(#circuit-neon-glow)"
-                        className="circuit-pulse-running-trail"
-                      />
-                      {/* Secondary Micro-Line */}
-                      <path
-                        d={`M ${wirePoints.camLeft + 50},${wirePoints.camCenterY + 60} H ${wirePoints.cards[2].x + 55} V ${wirePoints.cards[2].y + 12} H ${wirePoints.cards[2].x + 18}`}
-                        stroke="url(#matrix-grad-left)"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.25"
-                      />
-                      {/* Camera Origin Node */}
-                      <circle cx={wirePoints.camLeft + 35} cy={wirePoints.camCenterY + 45} r="3.5" fill="#ff2d55" stroke="#ffffff" strokeWidth="1" />
-                    </g>
-                  )}
-                </g>
+                  <circle cx={c2.x} cy={c2.y} r="4.5" className="node-pulse-lead" />
+                  <circle cx={c2.x + 20} cy={c2.y + 25} r="3.5" className="node-pulse-trail" />
+                  <circle cx={c2.x + 10} cy={c2.y - 15} r="3" className="node-pulse-mid" />
 
-                {/* =====================================================================
-                    RIGHT CHANNELS: Camera -> Cards 3, 4, 5
-                    ===================================================================== */}
-                <g strokeLinecap="round" strokeLinejoin="round" fill="none">
-                  {/* Channel 3: Alarm Integration (Top Right) */}
-                  {wirePoints.cards[3] && (
-                    <g key="ch-3">
-                      {/* Base Track */}
-                      <path
-                        d={`M ${wirePoints.camRight - 35},${wirePoints.camCenterY - 45} H ${wirePoints.cards[3].x - 35} V ${wirePoints.cards[3].y} H ${wirePoints.cards[3].x}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="1.8"
-                        strokeOpacity="0.32"
-                      />
-                      {/* Running Pulse */}
-                      <path
-                        d={`M ${wirePoints.camRight - 35},${wirePoints.camCenterY - 45} H ${wirePoints.cards[3].x - 35} V ${wirePoints.cards[3].y} H ${wirePoints.cards[3].x}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="2.8"
-                        filter="url(#circuit-neon-glow)"
-                        className="circuit-pulse-running-lead"
-                      />
-                      {/* Secondary Micro-Line */}
-                      <path
-                        d={`M ${wirePoints.camRight - 50},${wirePoints.camCenterY - 60} H ${wirePoints.cards[3].x - 55} V ${wirePoints.cards[3].y - 12} H ${wirePoints.cards[3].x - 18}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.25"
-                      />
-                      {/* Camera Origin Node */}
-                      <circle cx={wirePoints.camRight - 35} cy={wirePoints.camCenterY - 45} r="3.5" fill="#ff2d55" stroke="#ffffff" strokeWidth="1" />
-                    </g>
-                  )}
+                  {/* Right Terminal Matrix Pads */}
+                  <circle cx={c3.x} cy={c3.y} r="4.5" className="node-pulse-lead" />
+                  <circle cx={c3.x - 20} cy={c3.y - 25} r="3.5" className="node-pulse-mid" />
+                  <circle cx={c3.x - 10} cy={c3.y + 15} r="3" className="node-pulse-trail" />
 
-                  {/* Channel 4: Remote Access (Middle Right - Bowed Outwards) */}
-                  {wirePoints.cards[4] && (
-                    <g key="ch-4">
-                      {/* Base Track (Straight Laser Bus) */}
-                      <path
-                        d={`M ${wirePoints.camRight - 15},${wirePoints.cards[4].y} H ${wirePoints.cards[4].x}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="2.2"
-                        strokeOpacity="0.35"
-                      />
-                      {/* Running Pulse */}
-                      <path
-                        d={`M ${wirePoints.camRight - 15},${wirePoints.cards[4].y} H ${wirePoints.cards[4].x}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="3.2"
-                        filter="url(#circuit-neon-glow)"
-                        className="circuit-pulse-running-mid"
-                      />
-                      {/* Secondary Micro-Line */}
-                      <path
-                        d={`M ${wirePoints.camRight - 35},${wirePoints.cards[4].y + 14} H ${wirePoints.cards[4].x - 30} V ${wirePoints.cards[4].y + 14} H ${wirePoints.cards[4].x - 10}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.25"
-                      />
-                      {/* Camera Origin Node */}
-                      <circle cx={wirePoints.camRight - 15} cy={wirePoints.cards[4].y} r="4" fill="#a855f7" stroke="#ffffff" strokeWidth="1" />
-                    </g>
-                  )}
+                  <circle cx={c4.x} cy={c4.y} r="4.5" className="node-pulse-mid" />
+                  <circle cx={c4.x - 20} cy={c4.y + 24} r="3.5" className="node-pulse-trail" />
+                  <circle cx={c4.x - 40} cy={c4.y - 32} r="3" className="node-pulse-lead" />
 
-                  {/* Channel 5: Multi-Camera View (Bottom Right) */}
-                  {wirePoints.cards[5] && (
-                    <g key="ch-5">
-                      {/* Base Track */}
-                      <path
-                        d={`M ${wirePoints.camRight - 35},${wirePoints.camCenterY + 45} H ${wirePoints.cards[5].x - 35} V ${wirePoints.cards[5].y} H ${wirePoints.cards[5].x}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="1.8"
-                        strokeOpacity="0.32"
-                      />
-                      {/* Running Pulse */}
-                      <path
-                        d={`M ${wirePoints.camRight - 35},${wirePoints.camCenterY + 45} H ${wirePoints.cards[5].x - 35} V ${wirePoints.cards[5].y} H ${wirePoints.cards[5].x}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="2.8"
-                        filter="url(#circuit-neon-glow)"
-                        className="circuit-pulse-running-trail"
-                      />
-                      {/* Secondary Micro-Line */}
-                      <path
-                        d={`M ${wirePoints.camRight - 50},${wirePoints.camCenterY + 60} H ${wirePoints.cards[5].x - 55} V ${wirePoints.cards[5].y + 12} H ${wirePoints.cards[5].x - 18}`}
-                        stroke="url(#matrix-grad-right)"
-                        strokeWidth="1.2"
-                        strokeOpacity="0.25"
-                      />
-                      {/* Camera Origin Node */}
-                      <circle cx={wirePoints.camRight - 35} cy={wirePoints.camCenterY + 45} r="3.5" fill="#ff2d55" stroke="#ffffff" strokeWidth="1" />
-                    </g>
-                  )}
-                </g>
-
-                {/* Solder Terminals directly on the cards' connection edge */}
-                <g fill="#38bdf8" stroke="#ffffff" strokeWidth="1.5">
-                  {wirePoints.cards.map((c, i) => c && (
-                    <g key={i}>
-                      <circle
-                        cx={c.x}
-                        cy={c.y}
-                        r="5"
-                        fill={i === 1 || i === 4 ? "#38bdf8" : (i < 3 ? "#38bdf8" : "#ff2d55")}
-                        stroke="#ffffff"
-                        strokeWidth="1.5"
-                        className={i % 3 === 0 ? "node-pulse-lead" : (i % 3 === 1 ? "node-pulse-mid" : "node-pulse-trail")}
-                      />
-                      <circle
-                        cx={c.x}
-                        cy={c.y}
-                        r="8"
-                        fill="none"
-                        stroke={i < 3 ? "#38bdf8" : "#ff2d55"}
-                        strokeWidth="1.5"
-                        opacity="0.6"
-                        className="animate-ping"
-                      />
-                    </g>
-                  ))}
+                  <circle cx={c5.x} cy={c5.y} r="4.5" className="node-pulse-lead" />
+                  <circle cx={c5.x - 20} cy={c5.y + 25} r="3.5" className="node-pulse-trail" />
+                  <circle cx={c5.x - 10} cy={c5.y - 15} r="3" className="node-pulse-mid" />
                 </g>
               </svg>
             )}
 
-            {/* Left Column - 3 Feature Cards (Circular Orbit: Middle Card Moved OUTWARDS) */}
-            <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-5 py-1 relative z-20 ${isVisible ? 'anim-card-slide-left' : 'opacity-0'}`}>
+            {/* Left Column - 3 Feature Cards (Compact, Sleek, Outward Circular Arc) */}
+            <div className={`lg:col-span-4 flex flex-col items-center lg:items-end gap-3.5 sm:gap-4 py-1 relative z-20 ${isVisible ? 'anim-card-slide-left' : 'opacity-0'}`}>
               {leftCapabilities.map((item, idx) => (
                 <div
                   key={idx}
                   ref={el => { cardRefs.current[idx] = el; }}
-                  className={`transition-all duration-300 ${
+                  className={`w-full max-w-[340px] sm:max-w-[355px] transition-all duration-300 ${
                     idx === 1
-                      ? 'lg:-translate-x-6 xl:-translate-x-8' // MOTION DETECTION BOWED OUTWARDS IN A CIRCLE
-                      : 'lg:translate-x-8 xl:translate-x-10'  // TOP & BOTTOM CURVED INWARDS TOWARDS CAMERA
+                      ? 'lg:-translate-x-5 xl:-translate-x-6' // MOTION DETECTION BOWED OUTWARDS IN A CIRCLE
+                      : 'lg:translate-x-5 xl:translate-x-6'   // TOP & BOTTOM CURVED INWARDS TOWARDS CAMERA
                   }`}
                 >
                   <div
-                    className="capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#ff2d55]/50 hover:-translate-y-1 relative z-20"
+                    className="capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#ff2d55]/50 hover:-translate-y-1 relative z-20"
                     style={{
                       animation: `orbit-minimal-${idx + 1} ${6.5 + idx * 0.9}s ease-in-out infinite`,
                       animationDelay: `-${idx * 1.6}s`
@@ -440,8 +368,8 @@ export default function PowerfulCapabilities() {
                       <img src={item.iconImg} alt={item.title} className="w-full h-full object-contain" />
                     </div>
                     <div className="capability-content">
-                      <h3 className="text-[18px] sm:text-[19px] font-bold text-[#273752] leading-tight mb-1">{item.title}</h3>
-                      <p className="text-xs sm:text-sm text-[#717d96] font-normal leading-relaxed">{item.desc}</p>
+                      <h3 className="text-[17px] sm:text-[18px] font-bold text-[#273752] leading-tight mb-1">{item.title}</h3>
+                      <p className="text-xs sm:text-[13px] text-[#717d96] font-normal leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 </div>
@@ -463,20 +391,20 @@ export default function PowerfulCapabilities() {
               </div>
             </div>
 
-            {/* Right Column - 3 Feature Cards (Circular Orbit: Middle Card Moved OUTWARDS) */}
-            <div className={`lg:col-span-4 flex flex-col gap-4 sm:gap-5 py-1 relative z-20 ${isVisible ? 'anim-card-slide-right' : 'opacity-0'}`}>
+            {/* Right Column - 3 Feature Cards (Compact, Sleek, Outward Circular Arc) */}
+            <div className={`lg:col-span-4 flex flex-col items-center lg:items-start gap-3.5 sm:gap-4 py-1 relative z-20 ${isVisible ? 'anim-card-slide-right' : 'opacity-0'}`}>
               {rightCapabilities.map((item, idx) => (
                 <div
                   key={idx}
                   ref={el => { cardRefs.current[idx + 3] = el; }}
-                  className={`transition-all duration-300 ${
+                  className={`w-full max-w-[340px] sm:max-w-[355px] transition-all duration-300 ${
                     idx === 1
-                      ? 'lg:translate-x-6 xl:translate-x-8'   // REMOTE ACCESS BOWED OUTWARDS IN A CIRCLE
-                      : 'lg:-translate-x-8 xl:-translate-x-10' // TOP & BOTTOM CURVED INWARDS TOWARDS CAMERA
+                      ? 'lg:translate-x-5 xl:translate-x-6'   // REMOTE ACCESS BOWED OUTWARDS IN A CIRCLE
+                      : 'lg:-translate-x-5 xl:-translate-x-6' // TOP & BOTTOM CURVED INWARDS TOWARDS CAMERA
                   }`}
                 >
                   <div
-                    className="capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-4 sm:p-5 flex items-center gap-4 sm:gap-5 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#38bdf8]/50 hover:-translate-y-1 relative z-20"
+                    className="capability-card bg-white/92 backdrop-blur-md border border-slate-200/80 rounded-xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4 transition-all duration-300 shadow-md hover:shadow-lg hover:border-[#38bdf8]/50 hover:-translate-y-1 relative z-20"
                     style={{
                       animation: `orbit-minimal-${((idx + 2) % 4) + 1} ${7.2 + idx * 0.8}s ease-in-out infinite`,
                       animationDelay: `-${(idx + 2) * 1.4}s`
@@ -487,8 +415,8 @@ export default function PowerfulCapabilities() {
                       <img src={item.iconImg} alt={item.title} className="w-full h-full object-contain" />
                     </div>
                     <div className="capability-content">
-                      <h3 className="text-[18px] sm:text-[19px] font-bold text-[#273752] leading-tight mb-1">{item.title}</h3>
-                      <p className="text-xs sm:text-sm text-[#717d96] font-normal leading-relaxed">{item.desc}</p>
+                      <h3 className="text-[17px] sm:text-[18px] font-bold text-[#273752] leading-tight mb-1">{item.title}</h3>
+                      <p className="text-xs sm:text-[13px] text-[#717d96] font-normal leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 </div>

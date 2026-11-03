@@ -1281,60 +1281,90 @@ a.footer-contact-row:hover .footer-contact-icon-box {
 }
 
 /* ==========================================================================
-   DYNAMIC RUNNING CIRCUIT PULSE (CONTINUOUS FLOW ALONG CONNECTED BUS TRACKS)
+   DYNAMIC CIRCUIT LINE GROWING FROM ZERO (CENTER CAMERA OUT TO CARDS)
    ========================================================================== */
-@keyframes circuitPulseFlow {
+@keyframes circuit-grow-from-zero {
   0% {
-    stroke-dashoffset: 140;
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  42% {
+    stroke-dashoffset: 0;
+    opacity: 0.95;
+  }
+  72% {
+    stroke-dashoffset: 0;
+    opacity: 0.9;
+  }
+  94% {
+    stroke-dashoffset: -100;
+    opacity: 0.15;
   }
   100% {
-    stroke-dashoffset: 0;
+    stroke-dashoffset: -100;
+    opacity: 0;
   }
 }
 
-@keyframes terminal-node-glow {
-  0%, 100% {
-    transform: scale(0.9);
-    opacity: 0.8;
+@keyframes terminal-node-pulse {
+  0%, 30% {
+    transform: scale(0.3);
+    opacity: 0;
   }
-  50% {
-    transform: scale(1.25);
+  42%, 72% {
+    transform: scale(1.15);
     opacity: 1;
-    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.95));
+  }
+  88%, 100% {
+    transform: scale(0.5);
+    opacity: 0;
   }
 }
 
-.circuit-pulse-running-lead {
-  stroke-dasharray: 28 112;
-  animation: circuitPulseFlow 2.6s linear infinite;
+.circuit-grow-lead {
+  stroke-dasharray: 100;
+  animation: circuit-grow-from-zero 5.0s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.circuit-pulse-running-mid {
-  stroke-dasharray: 28 112;
-  animation: circuitPulseFlow 2.6s linear infinite;
-  animation-delay: -0.9s;
+.circuit-grow-mid {
+  stroke-dasharray: 100;
+  animation: circuit-grow-from-zero 5.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -1.5s;
 }
 
-.circuit-pulse-running-trail {
-  stroke-dasharray: 28 112;
-  animation: circuitPulseFlow 2.6s linear infinite;
-  animation-delay: -1.8s;
+.circuit-grow-trail {
+  stroke-dasharray: 100;
+  animation: circuit-grow-from-zero 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -3.0s;
 }
 
-.node-pulse-lead,
-.node-pulse-mid,
-.node-pulse-trail {
+.circuit-grow-sub {
+  stroke-dasharray: 100;
+  animation: circuit-grow-from-zero 5.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation-delay: -0.8s;
+}
+
+.node-pulse-lead {
   transform-box: fill-box;
   transform-origin: center;
-  animation: terminal-node-glow 2.2s ease-in-out infinite;
+  animation: terminal-node-pulse 5.0s ease-in-out infinite;
 }
 
 .node-pulse-mid {
-  animation-delay: -0.7s;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terminal-node-pulse 5.8s ease-in-out infinite;
+  animation-delay: -1.5s;
 }
 
 .node-pulse-trail {
-  animation-delay: -1.4s;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terminal-node-pulse 6.5s ease-in-out infinite;
+  animation-delay: -3.0s;
 }
 
 /* ==========================================================================
