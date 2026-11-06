@@ -176,222 +176,172 @@ export default function PowerfulCapabilities() {
                   </linearGradient>
                 </defs>
 
-                {/* DYNAMIC MATRIX DATA CONDUITS (Orthogonal Double Shade Matrix Bus) */}
+                {/* DYNAMIC MATRIX DATA CONDUITS (2 Clean Conduits Per Feature Card) */}
                 <g strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter" fill="none">
                   {/* === LEFT MATRIX CHANNELS (Camera to Left Cards) === */}
                   
-                  {/* Channel 1: Top Matrix Bus to Real-Time Monitoring */}
-                  {/* Base Track (Always 100% visible connecting conduit) */}
+                  {/* Channel 1: Real-Time Monitoring (Top Left - 2 Lines) */}
+                  {/* Line 1A: Primary Matrix Bus */}
                   <path
                     d={`M ${camL + 40},${camCY - 45} H ${c0.x + 40} V ${c0.y} H ${c0.x}`}
                     stroke="url(#matrix-grad-left)"
                     strokeWidth="2.2"
                     strokeOpacity="0.32"
                   />
-                  {/* Flowing Laser Signal */}
                   <path
                     d={`M ${camL + 40},${camCY - 45} H ${c0.x + 40} V ${c0.y} H ${c0.x}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-left)"
                     className="circuit-grow-lead"
                   />
-                  {/* Parallel Micro-Trace */}
+                  {/* Line 1B: Parallel Micro-Trace */}
                   <path
-                    d={`M ${camL + 40},${camCY - 60} H ${c0.x + 60} V ${c0.y - 25} H ${c0.x + 20}`}
+                    d={`M ${camL + 40},${camCY - 60} H ${c0.x + 55} V ${c0.y - 18} H ${c0.x + 15}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-left)"
+                    strokeWidth="1.8"
                     className="circuit-grow-mid"
                   />
-                  {/* Matrix Step Branch */}
-                  <path
-                    d={`M ${c0.x + 40},${Math.round((camCY - 45 + c0.y) / 2)} H ${c0.x + 80} V ${c0.y + 15} H ${c0.x + 10}`}
-                    pathLength="100"
-                    stroke="url(#matrix-grad-left)"
-                    className="circuit-grow-sub"
-                  />
 
-                  {/* Channel 2: Middle Matrix Bus to Motion Detection (Bowed Outwards) */}
-                  {/* Base Track */}
+                  {/* Channel 2: Motion Detection (Middle Left - Bowed Outwards - 2 Lines) */}
+                  {/* Line 2A: Primary Matrix Bus */}
                   <path
                     d={`M ${camL + 40},${camCY} H ${c1.x + 45} V ${c1.y} H ${c1.x}`}
                     stroke="url(#matrix-grad-left)"
                     strokeWidth="2.2"
                     strokeOpacity="0.32"
                   />
-                  {/* Flowing Laser Signal (Exact same running pulse as top & bottom) */}
                   <path
                     d={`M ${camL + 40},${camCY} H ${c1.x + 45} V ${c1.y} H ${c1.x}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-left)"
                     className="circuit-grow-lead"
                   />
-                  {/* Parallel Micro-Trace */}
+                  {/* Line 2B: Parallel Micro-Trace */}
                   <path
-                    d={`M ${camL + 40},${camCY + 15} H ${c1.x + 65} V ${c1.y + 18} H ${c1.x + 20}`}
+                    d={`M ${camL + 40},${camCY + 18} H ${c1.x + 60} V ${c1.y + 18} H ${c1.x + 15}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-left)"
+                    strokeWidth="1.8"
                     className="circuit-grow-mid"
                   />
-                  {/* Matrix Step Branch */}
-                  <path
-                    d={`M ${c1.x + 45},${Math.round((camCY + c1.y) / 2)} H ${c1.x + 85} V ${c1.y - 18} H ${c1.x + 10}`}
-                    pathLength="100"
-                    stroke="url(#matrix-grad-left)"
-                    className="circuit-grow-sub"
-                  />
 
-                  {/* Channel 3: Bottom Matrix Bus to Cloud Storage */}
-                  {/* Base Track */}
+                  {/* Channel 3: Cloud Storage (Bottom Left - 2 Lines) */}
+                  {/* Line 3A: Primary Matrix Bus */}
                   <path
                     d={`M ${camL + 40},${camCY + 45} H ${c2.x + 40} V ${c2.y} H ${c2.x}`}
                     stroke="url(#matrix-grad-left)"
                     strokeWidth="2.2"
                     strokeOpacity="0.32"
                   />
-                  {/* Flowing Laser Signal */}
                   <path
                     d={`M ${camL + 40},${camCY + 45} H ${c2.x + 40} V ${c2.y} H ${c2.x}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-left)"
                     className="circuit-grow-lead"
                   />
-                  {/* Parallel Micro-Trace */}
+                  {/* Line 3B: Parallel Micro-Trace */}
                   <path
-                    d={`M ${camL + 40},${camCY + 60} H ${c2.x + 60} V ${c2.y + 25} H ${c2.x + 20}`}
+                    d={`M ${camL + 40},${camCY + 60} H ${c2.x + 55} V ${c2.y + 18} H ${c2.x + 15}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-left)"
+                    strokeWidth="1.8"
                     className="circuit-grow-trail"
-                  />
-                  {/* Matrix Step Branch */}
-                  <path
-                    d={`M ${c2.x + 40},${Math.round((camCY + 45 + c2.y) / 2)} H ${c2.x + 80} V ${c2.y - 15} H ${c2.x + 10}`}
-                    pathLength="100"
-                    stroke="url(#matrix-grad-left)"
-                    className="circuit-grow-mid"
                   />
 
                   {/* === RIGHT MATRIX CHANNELS (Camera to Right Cards) === */}
                   
-                  {/* Channel 4: Top Matrix Bus to Alarm Integration */}
-                  {/* Base Track */}
+                  {/* Channel 4: Alarm Integration (Top Right - 2 Lines) */}
+                  {/* Line 4A: Primary Matrix Bus */}
                   <path
                     d={`M ${camR - 40},${camCY - 45} H ${c3.x - 40} V ${c3.y} H ${c3.x}`}
                     stroke="url(#matrix-grad-right)"
                     strokeWidth="2.2"
                     strokeOpacity="0.32"
                   />
-                  {/* Flowing Laser Signal */}
                   <path
                     d={`M ${camR - 40},${camCY - 45} H ${c3.x - 40} V ${c3.y} H ${c3.x}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-right)"
                     className="circuit-grow-lead"
                   />
-                  {/* Parallel Micro-Trace */}
+                  {/* Line 4B: Parallel Micro-Trace */}
                   <path
-                    d={`M ${camR - 40},${camCY - 60} H ${c3.x - 60} V ${c3.y - 25} H ${c3.x - 20}`}
+                    d={`M ${camR - 40},${camCY - 60} H ${c3.x - 55} V ${c3.y - 18} H ${c3.x - 15}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-right)"
+                    strokeWidth="1.8"
                     className="circuit-grow-mid"
                   />
-                  {/* Matrix Step Branch */}
-                  <path
-                    d={`M ${c3.x - 40},${Math.round((camCY - 45 + c3.y) / 2)} H ${c3.x - 80} V ${c3.y + 15} H ${c3.x - 10}`}
-                    pathLength="100"
-                    stroke="url(#matrix-grad-right)"
-                    className="circuit-grow-sub"
-                  />
 
-                  {/* Channel 5: Middle Matrix Bus to Remote Access (Bowed Outwards) */}
-                  {/* Base Track */}
+                  {/* Channel 5: Remote Access (Middle Right - Bowed Outwards - 2 Lines) */}
+                  {/* Line 5A: Primary Matrix Bus */}
                   <path
                     d={`M ${camR - 40},${camCY} H ${c4.x - 45} V ${c4.y} H ${c4.x}`}
                     stroke="url(#matrix-grad-right)"
                     strokeWidth="2.2"
                     strokeOpacity="0.32"
                   />
-                  {/* Flowing Laser Signal (Exact same running pulse as top & bottom) */}
                   <path
                     d={`M ${camR - 40},${camCY} H ${c4.x - 45} V ${c4.y} H ${c4.x}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-right)"
                     className="circuit-grow-lead"
                   />
-                  {/* Parallel Micro-Trace */}
+                  {/* Line 5B: Parallel Micro-Trace */}
                   <path
-                    d={`M ${camR - 40},${camCY + 15} H ${c4.x - 65} V ${c4.y + 18} H ${c4.x - 20}`}
+                    d={`M ${camR - 40},${camCY + 18} H ${c4.x - 60} V ${c4.y + 18} H ${c4.x - 15}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-right)"
+                    strokeWidth="1.8"
                     className="circuit-grow-mid"
                   />
-                  {/* Matrix Step Branch */}
-                  <path
-                    d={`M ${c4.x - 45},${Math.round((camCY + c4.y) / 2)} H ${c4.x - 85} V ${c4.y - 18} H ${c4.x - 10}`}
-                    pathLength="100"
-                    stroke="url(#matrix-grad-right)"
-                    className="circuit-grow-sub"
-                  />
 
-                  {/* Channel 6: Bottom Matrix Bus to Multi-Camera View */}
-                  {/* Base Track */}
+                  {/* Channel 6: Multi-Camera View (Bottom Right - 2 Lines) */}
+                  {/* Line 6A: Primary Matrix Bus */}
                   <path
                     d={`M ${camR - 40},${camCY + 45} H ${c5.x - 40} V ${c5.y} H ${c5.x}`}
                     stroke="url(#matrix-grad-right)"
                     strokeWidth="2.2"
                     strokeOpacity="0.32"
                   />
-                  {/* Flowing Laser Signal */}
                   <path
                     d={`M ${camR - 40},${camCY + 45} H ${c5.x - 40} V ${c5.y} H ${c5.x}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-right)"
                     className="circuit-grow-lead"
                   />
-                  {/* Parallel Micro-Trace */}
+                  {/* Line 6B: Parallel Micro-Trace */}
                   <path
-                    d={`M ${camR - 40},${camCY + 60} H ${c5.x - 60} V ${c5.y + 25} H ${c5.x - 20}`}
+                    d={`M ${camR - 40},${camCY + 60} H ${c5.x - 55} V ${c5.y + 18} H ${c5.x - 15}`}
                     pathLength="100"
                     stroke="url(#matrix-grad-right)"
+                    strokeWidth="1.8"
                     className="circuit-grow-trail"
-                  />
-                  {/* Matrix Step Branch */}
-                  <path
-                    d={`M ${c5.x - 40},${Math.round((camCY + 45 + c5.y) / 2)} H ${c5.x - 80} V ${c5.y - 15} H ${c5.x - 10}`}
-                    pathLength="100"
-                    stroke="url(#matrix-grad-right)"
-                    className="circuit-grow-mid"
                   />
                 </g>
 
-                {/* MATRIX DATA NODES & SOLDER TERMINALS (At Card Margins with Double Shade Glow) */}
+                {/* MATRIX DATA NODES & SOLDER TERMINALS (Exactly 2 Solder Pads Per Feature Card) */}
                 <g fill="#38bdf8" stroke="#ff2d55" strokeWidth="1.8">
-                  {/* Left Terminal Matrix Pads */}
+                  {/* Left Terminal Matrix Pads (2 per card) */}
                   <circle cx={c0.x} cy={c0.y} r="4.5" className="node-pulse-lead" />
-                  <circle cx={c0.x + 20} cy={c0.y - 25} r="3.5" className="node-pulse-mid" />
-                  <circle cx={c0.x + 10} cy={c0.y + 15} r="3" className="node-pulse-trail" />
+                  <circle cx={c0.x + 15} cy={c0.y - 18} r="3.5" className="node-pulse-mid" />
 
-                  {/* Motion Detection: Main Pad right on the card edge + micro pads */}
                   <circle cx={c1.x} cy={c1.y} r="4.5" className="node-pulse-lead" />
-                  <circle cx={c1.x + 20} cy={c1.y + 18} r="3.5" className="node-pulse-mid" />
-                  <circle cx={c1.x + 10} cy={c1.y - 18} r="3" className="node-pulse-trail" />
+                  <circle cx={c1.x + 15} cy={c1.y + 18} r="3.5" className="node-pulse-mid" />
 
                   <circle cx={c2.x} cy={c2.y} r="4.5" className="node-pulse-lead" />
-                  <circle cx={c2.x + 20} cy={c2.y + 25} r="3.5" className="node-pulse-trail" />
-                  <circle cx={c2.x + 10} cy={c2.y - 15} r="3" className="node-pulse-mid" />
+                  <circle cx={c2.x + 15} cy={c2.y + 18} r="3.5" className="node-pulse-trail" />
 
-                  {/* Right Terminal Matrix Pads */}
+                  {/* Right Terminal Matrix Pads (2 per card) */}
                   <circle cx={c3.x} cy={c3.y} r="4.5" className="node-pulse-lead" />
-                  <circle cx={c3.x - 20} cy={c3.y - 25} r="3.5" className="node-pulse-mid" />
-                  <circle cx={c3.x - 10} cy={c3.y + 15} r="3" className="node-pulse-trail" />
+                  <circle cx={c3.x - 15} cy={c3.y - 18} r="3.5" className="node-pulse-mid" />
 
-                  {/* Remote Access: Main Pad right on the card edge + micro pads */}
                   <circle cx={c4.x} cy={c4.y} r="4.5" className="node-pulse-lead" />
-                  <circle cx={c4.x - 20} cy={c4.y + 18} r="3.5" className="node-pulse-mid" />
-                  <circle cx={c4.x - 10} cy={c4.y - 18} r="3" className="node-pulse-trail" />
+                  <circle cx={c4.x - 15} cy={c4.y + 18} r="3.5" className="node-pulse-mid" />
 
                   <circle cx={c5.x} cy={c5.y} r="4.5" className="node-pulse-lead" />
-                  <circle cx={c5.x - 20} cy={c5.y + 25} r="3.5" className="node-pulse-trail" />
-                  <circle cx={c5.x - 10} cy={c5.y - 15} r="3" className="node-pulse-mid" />
+                  <circle cx={c5.x - 15} cy={c5.y + 18} r="3.5" className="node-pulse-trail" />
                 </g>
               </svg>
             )}
