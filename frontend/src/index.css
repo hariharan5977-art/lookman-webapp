@@ -1347,6 +1347,21 @@ a.footer-contact-row:hover .footer-contact-icon-box {
   animation-delay: -0.8s;
 }
 
+/* Continuous Active Laser Pulse for Direct Conduit Flow */
+@keyframes circuit-pulse-continuous {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: -100;
+  }
+}
+
+.circuit-flow-active {
+  stroke-dasharray: 28 72;
+  animation: circuit-pulse-continuous 2.4s linear infinite;
+}
+
 .node-pulse-lead {
   transform-box: fill-box;
   transform-origin: center;
