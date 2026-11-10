@@ -175,7 +175,7 @@ const PorterDeliveryMap = () => {
         {/* 1. SEPARATE ROUTE: Chennai -> Delhi NCR (North Corridor) */}
         <path
           id="routeToDelhi"
-          d="M 895 530 C 875 440, 845 320, 830 205"
+          d="M 814 555 C 802 490, 785 410, 778 350 C 772 300, 768 255, 770 212"
           fill="none"
           stroke="url(#routeGradDelhi)"
           strokeWidth="2.8"
@@ -193,7 +193,7 @@ const PorterDeliveryMap = () => {
         {/* 2. SEPARATE ROUTE: Chennai -> Mumbai (West Corridor) */}
         <path
           id="routeToMumbai"
-          d="M 895 530 C 830 500, 750 460, 700 405"
+          d="M 814 555 C 765 545, 695 490, 665 440 Q 652 422 644 407"
           fill="none"
           stroke="url(#routeGradMumbai)"
           strokeWidth="2.6"
@@ -211,7 +211,7 @@ const PorterDeliveryMap = () => {
         {/* 3. SEPARATE ROUTE: Chennai -> Kolkata (East Corridor) */}
         <path
           id="routeToKolkata"
-          d="M 895 530 C 940 450, 1000 395, 1055 335"
+          d="M 814 555 C 825 490, 860 440, 915 390 C 945 365, 968 350, 988 338"
           fill="none"
           stroke="url(#routeGradKolkata)"
           strokeWidth="2.6"
@@ -229,7 +229,7 @@ const PorterDeliveryMap = () => {
         {/* 4. SEPARATE ROUTE: Chennai -> Bengaluru (South Corridor) */}
         <path
           id="routeToBengaluru"
-          d="M 895 530 C 860 535, 820 535, 785 530"
+          d="M 814 555 Q 780 550 752 538"
           fill="none"
           stroke="url(#routeGradBengaluru)"
           strokeWidth="2.6"
@@ -246,7 +246,7 @@ const PorterDeliveryMap = () => {
 
         {/* 5. SEPARATE FEEDER: Chennai -> Hyderabad (Central Corridor) */}
         <path
-          d="M 895 530 C 885 495, 875 465, 865 435"
+          d="M 814 555 Q 808 495 794 442"
           fill="none"
           stroke="#f59e0b"
           strokeWidth="2"
@@ -357,7 +357,7 @@ const PorterDeliveryMap = () => {
         ════════════════════════════════════════════════════════════════ */}
 
         {/* 1. CHENNAI: Origin Dispatch Master Hub */}
-        <g transform="translate(895, 530)">
+        <g transform="translate(814, 555)">
           {/* Multiple Radar Dispatch Rings */}
           <circle cx="0" cy="0" r="7" fill="none" stroke="#ea0004" strokeWidth="1.6" opacity="0.9">
             <animate attributeName="r" values="5;26" dur="2s" repeatCount="indefinite" />
@@ -368,8 +368,8 @@ const PorterDeliveryMap = () => {
             <animate attributeName="opacity" values="0.8;0" dur="2s" begin="1s" repeatCount="indefinite" />
           </circle>
           <circle cx="0" cy="0" r="5.5" fill="#ea0004" stroke="#ffffff" strokeWidth="2" filter="url(#goldGlow)" />
-          {/* Dispatch Pin Badge placed cleanly on the left of the beacon */}
-          <g transform="translate(-132, 4)">
+          {/* Dispatch Pin Badge placed neatly on the right towards truck corridor */}
+          <g transform="translate(14, -10)">
             <rect x="0" y="-10" width="126" height="20" rx="10" fill="#0f172a" fillOpacity="0.94" stroke="#ea0004" strokeWidth="1.2" />
             <circle cx="10" cy="0" r="3.5" fill="#22c55e">
               <animate attributeName="opacity" values="1;0.4;1" dur="1s" repeatCount="indefinite" />
@@ -381,7 +381,7 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 2. BENGALURU (Destination) */}
-        <g transform="translate(785, 530)">
+        <g transform="translate(752, 538)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#f59e0b" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2s" repeatCount="indefinite" />
@@ -396,7 +396,7 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 3. MUMBAI (Destination) */}
-        <g transform="translate(700, 405)">
+        <g transform="translate(644, 407)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#06b6d4" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2.4s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2.4s" repeatCount="indefinite" />
@@ -411,7 +411,7 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 4. HYDERABAD (Transit Node) */}
-        <g transform="translate(865, 435)">
+        <g transform="translate(794, 442)">
           <circle cx="0" cy="0" r="4" fill="none" stroke="#f59e0b" strokeWidth="1.2">
             <animate attributeName="r" values="3;14" dur="2.2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.8;0" dur="2.2s" repeatCount="indefinite" />
@@ -426,7 +426,7 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 5. KOLKATA (Destination) */}
-        <g transform="translate(1055, 335)">
+        <g transform="translate(988, 338)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#10b981" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2.2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2.2s" repeatCount="indefinite" />
@@ -441,7 +441,7 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 6. DELHI NCR (Destination) */}
-        <g transform="translate(830, 205)">
+        <g transform="translate(770, 212)">
           <circle cx="0" cy="0" r="5.5" fill="none" stroke="#38bdf8" strokeWidth="1.6">
             <animate attributeName="r" values="3;20" dur="2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2s" repeatCount="indefinite" />
