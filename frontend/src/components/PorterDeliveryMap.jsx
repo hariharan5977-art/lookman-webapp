@@ -175,7 +175,7 @@ const PorterDeliveryMap = () => {
         {/* 1. SEPARATE ROUTE: Chennai -> Delhi NCR (North Corridor) */}
         <path
           id="routeToDelhi"
-          d="M 814 555 C 802 490, 785 410, 778 350 C 772 300, 768 255, 770 212"
+          d="M 860 538 C 845 490, 835 460, 829 446 C 818 370, 810 290, 808 208"
           fill="none"
           stroke="url(#routeGradDelhi)"
           strokeWidth="2.8"
@@ -193,7 +193,7 @@ const PorterDeliveryMap = () => {
         {/* 2. SEPARATE ROUTE: Chennai -> Mumbai (West Corridor) */}
         <path
           id="routeToMumbai"
-          d="M 814 555 C 775 545, 735 485, 725 440 Q 718 425 712 416"
+          d="M 860 538 C 835 538, 825 535, 815 535 C 785 510, 755 460, 740 428 C 734 418, 728 412, 722 408"
           fill="none"
           stroke="url(#routeGradMumbai)"
           strokeWidth="2.6"
@@ -211,7 +211,7 @@ const PorterDeliveryMap = () => {
         {/* 3. SEPARATE ROUTE: Chennai -> Kolkata (East Corridor) */}
         <path
           id="routeToKolkata"
-          d="M 814 555 C 825 490, 860 440, 915 390 C 945 365, 968 350, 988 338"
+          d="M 860 538 C 880 490, 920 440, 965 390 C 990 362, 1010 345, 1029 332"
           fill="none"
           stroke="url(#routeGradKolkata)"
           strokeWidth="2.6"
@@ -229,7 +229,7 @@ const PorterDeliveryMap = () => {
         {/* 4. SEPARATE ROUTE: Chennai -> Bengaluru (South Corridor) */}
         <path
           id="routeToBengaluru"
-          d="M 814 555 Q 780 550 752 538"
+          d="M 860 538 Q 838 536 815 535"
           fill="none"
           stroke="url(#routeGradBengaluru)"
           strokeWidth="2.6"
@@ -246,7 +246,7 @@ const PorterDeliveryMap = () => {
 
         {/* 5. SEPARATE FEEDER: Chennai -> Hyderabad (Central Corridor) */}
         <path
-          d="M 814 555 Q 808 495 794 442"
+          d="M 860 538 Q 842 492 829 446"
           fill="none"
           stroke="#f59e0b"
           strokeWidth="2"
@@ -357,7 +357,7 @@ const PorterDeliveryMap = () => {
         ════════════════════════════════════════════════════════════════ */}
 
         {/* 1. CHENNAI: Origin Dispatch Master Hub */}
-        <g transform="translate(814, 555)">
+        <g transform="translate(860, 538)">
           {/* Multiple Radar Dispatch Rings */}
           <circle cx="0" cy="0" r="7" fill="none" stroke="#ea0004" strokeWidth="1.6" opacity="0.9">
             <animate attributeName="r" values="5;26" dur="2s" repeatCount="indefinite" />
@@ -381,13 +381,13 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 2. BENGALURU (Destination) */}
-        <g transform="translate(752, 538)">
+        <g transform="translate(815, 535)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#f59e0b" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2s" repeatCount="indefinite" />
           </circle>
           <circle cx="0" cy="0" r="4.2" fill="#f59e0b" stroke="#ffffff" strokeWidth="1.5" />
-          <g transform="translate(-74, 14)">
+          <g transform="translate(-76, -8)">
             <rect x="0" y="-8" width="68" height="16" rx="8" fill="#0f172a" fillOpacity="0.88" stroke="#f59e0b" strokeWidth="0.8" />
             <text x="9" y="3.5" fill="#e2e8f0" fontSize="8.5" fontWeight="600" fontFamily="system-ui, sans-serif">
               Bengaluru
@@ -396,13 +396,13 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 3. MUMBAI (Destination) */}
-        <g transform="translate(712, 416)">
+        <g transform="translate(722, 408)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#06b6d4" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2.4s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2.4s" repeatCount="indefinite" />
           </circle>
           <circle cx="0" cy="0" r="4.2" fill="#06b6d4" stroke="#ffffff" strokeWidth="1.5" />
-          <g transform="translate(10, -8)">
+          <g transform="translate(12, -8)">
             <rect x="0" y="-8" width="56" height="16" rx="8" fill="#0f172a" fillOpacity="0.88" stroke="#06b6d4" strokeWidth="0.8" />
             <text x="9" y="3.5" fill="#e2e8f0" fontSize="8.5" fontWeight="600" fontFamily="system-ui, sans-serif">
               Mumbai
@@ -411,7 +411,7 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 4. HYDERABAD (Transit Node) */}
-        <g transform="translate(794, 442)">
+        <g transform="translate(829, 446)">
           <circle cx="0" cy="0" r="4" fill="none" stroke="#f59e0b" strokeWidth="1.2">
             <animate attributeName="r" values="3;14" dur="2.2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.8;0" dur="2.2s" repeatCount="indefinite" />
@@ -426,13 +426,13 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 5. KOLKATA (Destination) */}
-        <g transform="translate(988, 338)">
+        <g transform="translate(1029, 332)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#10b981" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2.2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2.2s" repeatCount="indefinite" />
           </circle>
           <circle cx="0" cy="0" r="4.2" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
-          <g transform="translate(10, 2)">
+          <g transform="translate(12, -8)">
             <rect x="0" y="-8" width="54" height="16" rx="8" fill="#0f172a" fillOpacity="0.88" stroke="#10b981" strokeWidth="0.8" />
             <text x="9" y="3.5" fill="#e2e8f0" fontSize="8.5" fontWeight="600" fontFamily="system-ui, sans-serif">
               Kolkata
@@ -441,13 +441,13 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 6. DELHI NCR (Destination) */}
-        <g transform="translate(770, 212)">
+        <g transform="translate(808, 208)">
           <circle cx="0" cy="0" r="5.5" fill="none" stroke="#38bdf8" strokeWidth="1.6">
             <animate attributeName="r" values="3;20" dur="2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2s" repeatCount="indefinite" />
           </circle>
           <circle cx="0" cy="0" r="4.5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1.6" />
-          <g transform="translate(-18, -20)">
+          <g transform="translate(12, -8)">
             <rect x="0" y="-8" width="62" height="16" rx="8" fill="#0f172a" fillOpacity="0.88" stroke="#38bdf8" strokeWidth="0.8" />
             <text x="8" y="3.5" fill="#e2e8f0" fontSize="8.5" fontWeight="600" fontFamily="system-ui, sans-serif">
               Delhi NCR
