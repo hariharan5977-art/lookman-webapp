@@ -19,6 +19,7 @@ const DEFAULT_URI = 'mongodb+srv://harilkm65_db_user:ZG4jcj2Do33VqOcM@cluster0.n
 const DB_PATH = path.join(__dirname, '../data/db.json');
 
 let isConnected = false;
+let retryTimer = null;
 
 function isMongoConnected() {
   return Boolean(mongoose && isConnected && mongoose.connection.readyState === 1);
@@ -178,6 +179,10 @@ async function connectDB() {
       connectTimeoutMS: 8000
     });
     isConnected = true;
+    if (retryTimer) {
+      clearInterval(retryTimer);
+      retryTimer = null;
+    }
     console.log('✓ MongoDB Connected Successfully to Atlas Cluster');
 
     // Run initial migration/sync of local records to MongoDB in background
@@ -187,7 +192,28 @@ async function connectDB() {
   } catch (err) {
     isConnected = false;
     console.warn(`! MongoDB Connection Notice: ${err.message}`);
+    console.warn('  -> Whitelist 0.0.0.0/0 in MongoDB Atlas > Network Access to allow access from GitHub Codespaces.');
     console.warn('  -> Using robust local JSON database fallback (backend/data/db.json). All features remain 100% active.');
+
+    // Auto-retry connection in the background every 20 seconds so once whitelisted, it connects automatically
+    if (!retryTimer) {
+      retryTimer = setInterval(async () => {
+        try {
+          await mongoose.connect(uri, {
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 8000
+          });
+          isConnected = true;
+          clearInterval(retryTimer);
+          retryTimer = null;
+          console.log('✓ MongoDB Connected Successfully to Atlas Cluster (Auto-reconnected)');
+          seedFromLocalDb().catch(e => console.warn('Background sync note:', e.message));
+        } catch (retryErr) {
+          // Keep local fallback active while awaiting Atlas whitelist update
+        }
+      }, 20000);
+    }
+
     return false;
   }
 }
