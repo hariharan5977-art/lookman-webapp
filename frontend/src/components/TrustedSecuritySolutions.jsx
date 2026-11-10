@@ -52,6 +52,14 @@ export default function TrustedSecuritySolutions({ onOpenQuoteWithDetails }) {
       image: "/solutions/solution_banking_vaults.webp",
       fallbackImage: "/solutions/solution_banking_vaults.jpg",
       desc: "Biometric dual-authentication triggers, tamper-proof conduit lines, and ultra-high frame rate capture."
+    },
+    {
+      id: 6,
+      title: "School & Campus Safety",
+      subtitle: "CAMPUS-WIDE REAL-TIME SHIELD",
+      image: "/solutions/solution_school_campus.webp",
+      fallbackImage: "/solutions/solution_school_campus.jpg",
+      desc: "Zero blind spot walkway surveillance, emergency lockdown integrations, and parent perimeter portals."
     }
   ];
 
