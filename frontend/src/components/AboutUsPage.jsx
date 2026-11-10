@@ -671,26 +671,15 @@ export default function AboutUsPage({ onOpenQuote, onSelectCategory }) {
                 </div>
               </div>
 
-              {/* Bottom Action Area (No Card, No Borders) */}
-              <div className="w-full pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-600 font-medium">
-                  <span className="flex items-center gap-1.5 font-bold text-[#12182b]">
-                    <ShieldCheck size={16} className="text-[#ea0004]" /> 10,000+ Completed Installations
-                  </span>
-                  <span>•</span>
-                  <span>Certified Installation Engineers</span>
-                  <span>•</span>
-                  <span>100% Workmanship Warranty</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenQuote('CCTV Installation & Service')}
-                  className="inline-flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-heading font-bold px-6 py-2.5 rounded-xl shadow-xs hover:shadow-md hover:opacity-95 transition-all cursor-pointer shrink-0 border-0"
-                  style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
-                >
-                  <span>Book Installation / Service</span>
-                  <ArrowRight size={14} />
-                </button>
+              {/* Bottom Action Area / Highlights (No Card, No Borders) */}
+              <div className="w-full pt-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-600 font-medium">
+                <span className="flex items-center gap-1.5 font-bold text-[#12182b]">
+                  <ShieldCheck size={16} className="text-[#ea0004]" /> 10,000+ Completed Installations
+                </span>
+                <span>•</span>
+                <span>Certified Installation Engineers</span>
+                <span>•</span>
+                <span>100% Workmanship Warranty</span>
               </div>
 
             </div>
@@ -797,26 +786,15 @@ export default function AboutUsPage({ onOpenQuote, onSelectCategory }) {
                 </div>
               </div>
 
-              {/* Bottom Action Area (No Card, No Borders) */}
-              <div className="w-full pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-600 font-medium">
-                  <span className="flex items-center gap-1.5 font-bold text-[#12182b]">
-                    <Truck size={16} className="text-amber-700" /> Porter Delivery Partner
-                  </span>
-                  <span>•</span>
-                  <span>Express Freight Corridors</span>
-                  <span>•</span>
-                  <span>100% Insured Cargo</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenQuote('Porter Express Delivery')}
-                  className="inline-flex items-center justify-center gap-2 text-white text-xs sm:text-sm font-heading font-bold px-6 py-2.5 rounded-xl shadow-xs hover:shadow-md hover:opacity-95 transition-all cursor-pointer shrink-0 border-0"
-                  style={{ background: 'linear-gradient(90deg, #ea0004 0%, #6a0006 100%)' }}
-                >
-                  <span>Book Express Dispatch</span>
-                  <ArrowRight size={14} />
-                </button>
+              {/* Bottom Action Area / Highlights (No Card, No Borders) */}
+              <div className="w-full pt-4 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-600 font-medium">
+                <span className="flex items-center gap-1.5 font-bold text-[#12182b]">
+                  <Truck size={16} className="text-amber-700" /> Porter Delivery Partner
+                </span>
+                <span>•</span>
+                <span>Express Freight Corridors</span>
+                <span>•</span>
+                <span>100% Insured Cargo</span>
               </div>
 
             </div>
