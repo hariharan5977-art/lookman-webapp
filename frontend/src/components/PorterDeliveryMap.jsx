@@ -193,7 +193,7 @@ const PorterDeliveryMap = () => {
         {/* 2. SEPARATE ROUTE: Chennai -> Mumbai (West Corridor) */}
         <path
           id="routeToMumbai"
-          d="M 814 555 C 765 545, 695 490, 665 440 Q 652 422 644 407"
+          d="M 814 555 C 775 545, 735 485, 725 440 Q 718 425 712 416"
           fill="none"
           stroke="url(#routeGradMumbai)"
           strokeWidth="2.6"
@@ -396,13 +396,13 @@ const PorterDeliveryMap = () => {
         </g>
 
         {/* 3. MUMBAI (Destination) */}
-        <g transform="translate(644, 407)">
+        <g transform="translate(712, 416)">
           <circle cx="0" cy="0" r="5" fill="none" stroke="#06b6d4" strokeWidth="1.5">
             <animate attributeName="r" values="3;18" dur="2.4s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="0.9;0" dur="2.4s" repeatCount="indefinite" />
           </circle>
           <circle cx="0" cy="0" r="4.2" fill="#06b6d4" stroke="#ffffff" strokeWidth="1.5" />
-          <g transform="translate(-62, -10)">
+          <g transform="translate(10, -8)">
             <rect x="0" y="-8" width="56" height="16" rx="8" fill="#0f172a" fillOpacity="0.88" stroke="#06b6d4" strokeWidth="0.8" />
             <text x="9" y="3.5" fill="#e2e8f0" fontSize="8.5" fontWeight="600" fontFamily="system-ui, sans-serif">
               Mumbai
