@@ -17,50 +17,41 @@ export default function TrustedSecuritySolutions({ onOpenQuoteWithDetails }) {
       id: 1,
       title: "Supervised Home Protection",
       subtitle: "SMART RESIDENTIAL CCTV SETUP",
-      image: "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1000&q=80",
+      image: "/solutions/solution_home_protection.webp",
+      fallbackImage: "/solutions/solution_home_protection.jpg",
       desc: "Discreet low-light dome cameras, real-time AI motion alerts, and automated cloud backup recording."
     },
     {
       id: 2,
       title: "Expert Camera Installation",
       subtitle: "CERTIFIED ENGINEERING SERVICES",
-      image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1000&q=80",
+      image: "/solutions/solution_expert_installation.webp",
+      fallbackImage: "/solutions/solution_expert_installation.jpg",
       desc: "Full architectural site survey, precision mounting, structured cabling, and NVR matrix configuration."
     },
     {
       id: 3,
       title: "Web/Cloud Security CCTV",
       subtitle: "ENTERPRISE 24/7 MONITORING",
-      image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1000&q=80",
+      image: "/solutions/solution_web_cloud_cctv.webp",
+      fallbackImage: "/solutions/solution_web_cloud_cctv.jpg",
       desc: "End-to-end encrypted multi-stream remote live feeds and instant failover localized storage."
     },
     {
       id: 4,
       title: "Industrial & Logistics Hubs",
       subtitle: "WAREHOUSE PERIMETER DEFENSE",
-      image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=80",
+      image: "/solutions/solution_industrial_logistics.webp",
+      fallbackImage: "/solutions/solution_industrial_logistics.jpg",
       desc: "Long-range optical zoom, automatic license plate recognition, and loading dock coverage."
     },
     {
       id: 5,
       title: "High-Security Banking Vaults",
       subtitle: "FINANCIAL ASSET PROTECTION",
-      image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1000&q=80",
+      image: "/solutions/solution_banking_vaults.webp",
+      fallbackImage: "/solutions/solution_banking_vaults.jpg",
       desc: "Biometric dual-authentication triggers, tamper-proof conduit lines, and ultra-high frame rate capture."
-    },
-    {
-      id: 6,
-      title: "AI Thermal & Facial Analytics",
-      subtitle: "INTELLIGENT ACCESS CONTROL",
-      image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1000&q=80",
-      desc: "Heat signature tracking, automated VIP & blacklist alerts, and unified visitor management logs."
-    },
-    {
-      id: 7,
-      title: "School & Campus Safety",
-      subtitle: "CAMPUS-WIDE REAL-TIME SHIELD",
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=80",
-      desc: "Zero blind spot walkway surveillance, emergency lockdown integrations, and parent perimeter portals."
     }
   ];
 
@@ -190,6 +181,30 @@ export default function TrustedSecuritySolutions({ onOpenQuoteWithDetails }) {
               Trusted <span className="bg-gradient-to-r from-[#ea0004] to-[#6a0006] bg-clip-text text-transparent">Security Solutions</span> For Every Space
             </h2>
           </div>
+
+          {/* Navigation Arrows for smooth manual sliding */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={slidePrev}
+              disabled={scrollProgress <= 0.01}
+              aria-label="Previous solution card"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 flex items-center justify-center text-slate-700 hover:text-[#e73455] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              onClick={slideNext}
+              disabled={scrollProgress >= 0.99}
+              aria-label="Next solution card"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-200 bg-white hover:bg-red-50 hover:border-red-200 flex items-center justify-center text-slate-700 hover:text-[#e73455] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Horizontal Sliding Cards Track — mask clips cards at the heading text margin on the left */}
@@ -223,11 +238,21 @@ export default function TrustedSecuritySolutions({ onOpenQuoteWithDetails }) {
                 className="group relative shrink-0 w-[230px] sm:w-[270px] md:w-[300px] lg:w-[320px] xl:w-[330px] h-[430px] sm:h-[460px] lg:h-[500px] rounded-2xl overflow-hidden cursor-pointer border border-[#eaecf0] shadow-sm hover:shadow-2xl transition-all duration-300 ease-out hover:-translate-y-3 hover:scale-[1.02] hover:z-30 will-change-transform bg-slate-950 select-none"
               >
                 {/* Background Photographic Image (Wide Portrait Format) */}
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 opacity-90"
-                />
+                <picture className="w-full h-full block">
+                  <source srcSet={card.image} type="image/webp" />
+                  <img
+                    src={card.fallbackImage || card.image}
+                    alt={card.title}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      if (card.fallbackImage && e.currentTarget.src !== card.fallbackImage) {
+                        e.currentTarget.src = card.fallbackImage;
+                      }
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
+                  />
+                </picture>
 
                 {/* Dark Gradient Overlay for perfect readability */}
                 <div
