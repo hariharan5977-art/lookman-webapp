@@ -15,7 +15,7 @@ const Solution = require('../models/Solution');
 const Category = require('../models/Category');
 const DeletedItem = require('../models/DeletedItem');
 
-const DEFAULT_URI = 'mongodb+srv://harilkm65_db_user:ZG4jcj2Do33VqOcM@cluster0.n1vq1ll.mongodb.net/lookman?retryWrites=true&w=majority&compressors=zlib';
+const DEFAULT_URI = 'mongodb+srv://harilkm65_db_user:harilkm%4065@cluster0.n1vq1ll.mongodb.net/lookman?retryWrites=true&w=majority&compressors=zlib';
 const DB_PATH = path.join(__dirname, '../data/db.json');
 
 let isConnected = false;
@@ -194,7 +194,7 @@ async function connectDB() {
     console.warn(`! MongoDB Connection Notice: ${err.message}`);
     if (err.message && (err.message.includes('auth') || err.message.includes('Authentication'))) {
       console.warn('  -> Authentication Failed: The password for database user "harilkm65_db_user" does not match Atlas.');
-      console.warn('  -> In Atlas > Security > Database Access: edit "harilkm65_db_user" and set the password to ZG4jcj2Do33VqOcM (or update backend/.env).');
+      console.warn('  -> In Atlas > Security > Database Access: verify password for "harilkm65_db_user" matches backend/.env.');
     } else {
       console.warn('  -> Whitelist 0.0.0.0/0 in MongoDB Atlas > Network Access to allow access from GitHub Codespaces.');
     }
