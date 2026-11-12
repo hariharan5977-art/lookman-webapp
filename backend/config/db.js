@@ -192,7 +192,12 @@ async function connectDB() {
   } catch (err) {
     isConnected = false;
     console.warn(`! MongoDB Connection Notice: ${err.message}`);
-    console.warn('  -> Whitelist 0.0.0.0/0 in MongoDB Atlas > Network Access to allow access from GitHub Codespaces.');
+    if (err.message && (err.message.includes('auth') || err.message.includes('Authentication'))) {
+      console.warn('  -> Authentication Failed: The password for database user "harilkm65_db_user" does not match Atlas.');
+      console.warn('  -> In Atlas > Security > Database Access: edit "harilkm65_db_user" and set the password to ZG4jcj2Do33VqOcM (or update backend/.env).');
+    } else {
+      console.warn('  -> Whitelist 0.0.0.0/0 in MongoDB Atlas > Network Access to allow access from GitHub Codespaces.');
+    }
     console.warn('  -> Using robust local JSON database fallback (backend/data/db.json). All features remain 100% active.');
 
     // Auto-retry connection in the background every 20 seconds so once whitelisted, it connects automatically
