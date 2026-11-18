@@ -129,8 +129,19 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     }
 
     // Merge deleted product tombstones
-    const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
-    let allDeleted = [...new Set([...localDeleted, ...backendDeleted])];
+    const builtInIds = new Set(ALL_LOOKMAN_PRODUCTS.map(p => String(p.id || '').toLowerCase().trim()));
+    const storedLocalDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
+    const localDeleted = storedLocalDeleted.filter(id =>
+      String(id || '').startsWith('builtin:') ||
+      !builtInIds.has(String(id || '').toLowerCase().trim())
+    );
+    if (localDeleted.length !== storedLocalDeleted.length) {
+      localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(localDeleted));
+    }
+    const effectiveBackendDeleted = backendDeleted.filter(
+      id => !builtInIds.has(String(id || '').toLowerCase().trim())
+    );
+    let allDeleted = [...new Set([...localDeleted, ...effectiveBackendDeleted])];
 
     // Purge active backend products from deleted tombstones so stale local items never hide database products
     if (prods && prods.length > 0) {
@@ -172,14 +183,11 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     const isDeleted = (p) => {
       if (!p) return false;
       const pid = String(p.id || '').toLowerCase().trim();
-      const pmodel = String(p.model || '').toLowerCase().trim();
-      const pcode = String(p.productCode || '').toLowerCase().trim();
-      const pname = String(p.name || '').toLowerCase().trim();
-      const pslug = String(p.slug || '').toLowerCase().trim();
+      const identity = pid || String(p.model || p.productCode || p.name || p.slug || '').toLowerCase().trim();
       return allDeleted.some(d => {
         if (!d) return false;
         const dl = String(d).toLowerCase().trim();
-        return dl === pid || dl === pmodel || dl === pcode || dl === pname || dl === pslug;
+        return dl === identity || dl === `builtin:${identity}`;
       });
     };
 
@@ -208,7 +216,7 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       return obsoleteCodes.some(c => m.includes(c));
     };
 
-    // 3. Merge products: custom products first, then backend products, with fallback to ALL_LOOKMAN_PRODUCTS
+    // 3. Merge custom, backend, and built-in products, with custom products first.
     const rawCustom = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
     const cleanedCustom = rawCustom.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
     if (cleanedCustom.length !== rawCustom.length) {
@@ -239,30 +247,25 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     const activeBackendProds = prods.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
 
     const combined = [...customProds];
-    activeBackendProds.forEach(bp => {
-      const bpModel = (bp.model || bp.productCode || bp.name || '').toLowerCase().trim();
-      const bpId = String(bp.id || '');
-      const already = combined.some(cp => 
-        (bpId && String(cp.id) === bpId) || 
-        (bpModel && (cp.model || cp.productCode || '').toLowerCase().trim() === bpModel) || 
-        (bpModel && (cp.name || '').toLowerCase().trim() === bpModel)
+    const hasProduct = (product) => {
+      const productId = String(product.id || '').toLowerCase().trim();
+      return combined.some(existing =>
+        productId && String(existing.id || '').toLowerCase().trim() === productId
       );
-      if (!already) {
-        combined.push(bp);
-      }
+    };
+
+    activeBackendProds.forEach(bp => {
+      if (!hasProduct(bp)) combined.push(bp);
     });
 
-    // If still empty (e.g. backend offline & no custom products), use ALL_LOOKMAN_PRODUCTS baseline
-    if (combined.length === 0) {
-      ALL_LOOKMAN_PRODUCTS.forEach(bp => {
-        if (!isSecuraSerial(bp) && !isObsoleteSample(bp)) {
-          combined.push(bp);
-        }
+    ALL_LOOKMAN_PRODUCTS
+      .filter(bp => !isSecuraSerial(bp) && !isObsoleteSample(bp))
+      .forEach(bp => {
+        if (!hasProduct(bp)) combined.push(bp);
       });
-    }
 
     setInquiries(mergedInquiries);
-    setProductsList(combined);
+    setProductsList(combined.filter(product => !isDeleted(product)));
     setLoadingData(false);
   };
 
@@ -270,10 +273,6 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     e.preventDefault();
     setAuthError('');
     setAuthLoading(true);
-
-    const inputEmail = loginEmail.trim().toLowerCase();
-    const isTargetUser = inputEmail === 'lookman@lookmanai.com' || inputEmail === 'admin@lookman.xyz' || inputEmail === 'admin';
-    const isTargetPass = loginPassword === 'Lookman@2026' || loginPassword === 'admin123' || loginPassword === 'lookman2026';
 
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
@@ -283,33 +282,17 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       });
       const data = await res.json();
 
-      if (data.success) {
-        onLogin(data.user, data.token);
-        setLoginPassword('');
-        setAuthLoading(false);
-        return;
-      } else if (!isTargetUser || !isTargetPass) {
+      if (!res.ok || !data.success) {
         setAuthError(data.message || 'Invalid email or password');
-        setAuthLoading(false);
         return;
       }
+      if (!data.user || !data.token) {
+        throw new Error('The authentication service returned an invalid response.');
+      }
+      onLogin(data.user, data.token);
+      setLoginPassword('');
     } catch (err) {
-      // Fallback for static Netlify hosting
-      if (isTargetUser && isTargetPass) {
-        const fallbackUser = {
-          username: 'lookman@lookmanai.com',
-          role: 'administrator',
-          company: 'LOOKMAN DISTRIBUTION PRIVATE LIMITED'
-        };
-        const fallbackToken = 'lookman_session_token_' + Date.now();
-        onLogin(fallbackUser, fallbackToken);
-        setLoginPassword('');
-        setAuthLoading(false);
-        return;
-      }
-      setAuthError('Invalid administrator credentials.');
-      setAuthLoading(false);
-      return;
+      setAuthError(err.message || 'Unable to reach the authentication service.');
     } finally {
       setAuthLoading(false);
     }
@@ -960,13 +943,19 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     });
 
     try {
-      await fetch(`${API_BASE}/products/bulk`, {
+      const response = await fetch(`${API_BASE}/products/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ products: formattedProducts, mode: importMode })
       });
-    } catch (e) {
-      // Offline fallback for Netlify
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'The server rejected the product import.');
+      }
+    } catch (error) {
+      setParseError(`Could not save the datasheet product to the database: ${error.message || 'Database request failed.'}`);
+      setIsImporting(false);
+      return;
     }
 
     const existingCustom = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
@@ -976,14 +965,13 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
       updatedCustom = formattedProducts;
     } else if (importMode === 'update') {
       const map = new Map();
-      existingCustom.forEach(p => map.set((p.model || p.name).toLowerCase(), p));
-      formattedProducts.forEach(p => map.set((p.model || p.name).toLowerCase(), p));
+      existingCustom.forEach(p => map.set(String(p.name || p.id).toLowerCase(), p));
+      formattedProducts.forEach(p => map.set(String(p.name || p.id).toLowerCase(), p));
       updatedCustom = Array.from(map.values());
     } else {
-      // Append: new products on top, avoid duplicate models
-      const existingFiltered = existingCustom.filter(
-        ep => !formattedProducts.some(np => np.model.toLowerCase() === (ep.model || ep.name || '').toLowerCase())
-      );
+      // Imports get unique IDs; fallback model codes and generated names are not product identities.
+      const importedIds = new Set(formattedProducts.map(p => String(p.id)));
+      const existingFiltered = existingCustom.filter(ep => !importedIds.has(String(ep.id)));
       updatedCustom = [...formattedProducts, ...existingFiltered];
     }
 
@@ -1010,7 +998,11 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
     localStorage.setItem('lookman_custom_products', JSON.stringify(updatedCustom));
 
     // Immediately display imported products in the live catalog
-    setProductsList(updatedCustom);
+    const importedIds = new Set(updatedCustom.map(p => String(p.id)));
+    setProductsList(prev => [
+      ...updatedCustom,
+      ...prev.filter(p => !importedIds.has(String(p.id)))
+    ]);
 
     setAddSuccessMsg(`🎉 Successfully imported and published ${formattedProducts.length} products from datasheet to live website!`);
     setTimeout(() => setAddSuccessMsg(''), 7000);
@@ -1046,25 +1038,30 @@ export default function AdminPage({ user, onLogin, onLogout, onBackToHome }) {
 
     // 2. Update deleted tombstones in localStorage so it never reappears on refresh
     const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
-    const toAdd = [idStr, modelStr, nameStr].filter(Boolean);
+    const isBuiltIn = ALL_LOOKMAN_PRODUCTS.some(p => String(p.id) === idStr);
+    const toAdd = [isBuiltIn ? `builtin:${idStr}` : idStr].filter(Boolean);
     const updatedDeleted = [...new Set([...localDeleted, ...toAdd])];
     localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(updatedDeleted));
 
     // 3. Remove from custom products in localStorage
     const customProds = JSON.parse(localStorage.getItem('lookman_custom_products') || '[]');
-    const filteredCustom = customProds.filter(p => 
-      String(p.id) !== idStr && 
-      (!p.model || p.model.toLowerCase() !== modelStr) && 
-      (!p.name || p.name.toLowerCase() !== nameStr)
-    );
+    const filteredCustom = customProds.filter(p => {
+      if (id !== undefined && id !== null && p.id !== undefined && p.id !== null) {
+        return String(p.id) !== idStr;
+      }
+      return (!p.model || p.model.toLowerCase() !== modelStr) &&
+        (!p.name || p.name.toLowerCase() !== nameStr);
+    });
     localStorage.setItem('lookman_custom_products', JSON.stringify(filteredCustom));
 
     // 4. Update live state immediately
-    setProductsList(prev => prev.filter(p => 
-      String(p.id) !== idStr && 
-      (!p.model || p.model.toLowerCase() !== modelStr) && 
-      (!p.name || p.name.toLowerCase() !== nameStr)
-    ));
+    setProductsList(prev => prev.filter(p => {
+      if (id !== undefined && id !== null && p.id !== undefined && p.id !== null) {
+        return String(p.id) !== idStr;
+      }
+      return (!p.model || p.model.toLowerCase() !== modelStr) &&
+        (!p.name || p.name.toLowerCase() !== nameStr);
+    }));
 
     // 5. Notify customer catalog in real-time
     if (typeof window !== 'undefined' && window.dispatchEvent) {

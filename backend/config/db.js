@@ -5,8 +5,7 @@ try {
   mongoose = null;
 }
 
-const fs = require('fs');
-const path = require('path');
+const local = require('../data/db.json');
 
 const Product = require('../models/Product');
 const Inquiry = require('../models/Inquiry');
@@ -15,9 +14,6 @@ const Solution = require('../models/Solution');
 const Category = require('../models/Category');
 const DeletedItem = require('../models/DeletedItem');
 
-const DEFAULT_URI = 'mongodb+srv://harilkm65_db_user:ZG4jcj2Do33VqOcM@cluster0.n1vq1ll.mongodb.net/lookman?retryWrites=true&w=majority&compressors=zlib';
-const DB_PATH = path.join(__dirname, '../data/db.json');
-
 let isConnected = false;
 let retryTimer = null;
 
@@ -25,11 +21,20 @@ function isMongoConnected() {
   return Boolean(mongoose && isConnected && mongoose.connection.readyState === 1);
 }
 
-async function seedFromLocalDb() {
+async function seedFromLocalDb({ onlyIfEmpty = false } = {}) {
   if (!isMongoConnected()) return false;
   try {
-    if (!fs.existsSync(DB_PATH)) return false;
-    const local = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    if (onlyIfEmpty) {
+      const existingCounts = await Promise.all([
+        Product.countDocuments(),
+        Inquiry.countDocuments(),
+        User.countDocuments(),
+        Solution.countDocuments(),
+        Category.countDocuments(),
+        DeletedItem.countDocuments()
+      ]);
+      if (existingCounts.some(count => count > 0)) return true;
+    }
 
     // 1. Seed Admin User
     if (local.admin && local.admin.username) {
@@ -162,7 +167,7 @@ async function seedFromLocalDb() {
   }
 }
 
-async function connectDB() {
+async function connectDB({ seedOnlyIfEmpty = false, waitForSeed = false } = {}) {
   if (!mongoose) {
     console.warn('! Note: Mongoose is not installed in this environment yet.');
     console.warn('  Run: npm install --prefix backend');
@@ -170,7 +175,11 @@ async function connectDB() {
     return false;
   }
 
-  const uri = process.env.MONGODB_URI || DEFAULT_URI;
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.warn('MONGODB_URI is not configured. Using the local JSON database fallback.');
+    return false;
+  }
 
   try {
     mongoose.set('strictQuery', false);
@@ -185,8 +194,14 @@ async function connectDB() {
     }
     console.log('✓ MongoDB Connected Successfully to Atlas Cluster');
 
-    // Run initial migration/sync of local records to MongoDB in background
-    seedFromLocalDb().catch(e => console.warn('Background sync note:', e.message));
+    const seed = seedFromLocalDb({ onlyIfEmpty: seedOnlyIfEmpty });
+    if (waitForSeed) {
+      if (!await seed) {
+        throw new Error('Initial MongoDB data seeding could not be completed.');
+      }
+    } else {
+      seed.catch(e => console.warn('Background sync note:', e.message));
+    }
 
     return true;
   } catch (err) {
@@ -196,7 +211,7 @@ async function connectDB() {
     console.warn('  -> Using robust local JSON database fallback (backend/data/db.json). All features remain 100% active.');
 
     // Auto-retry connection in the background every 20 seconds so once whitelisted, it connects automatically
-    if (!retryTimer) {
+    if (!process.env.NETLIFY && !retryTimer) {
       retryTimer = setInterval(async () => {
         try {
           await mongoose.connect(uri, {
@@ -207,7 +222,8 @@ async function connectDB() {
           clearInterval(retryTimer);
           retryTimer = null;
           console.log('✓ MongoDB Connected Successfully to Atlas Cluster (Auto-reconnected)');
-          seedFromLocalDb().catch(e => console.warn('Background sync note:', e.message));
+          seedFromLocalDb({ onlyIfEmpty: seedOnlyIfEmpty })
+            .catch(e => console.warn('Background sync note:', e.message));
         } catch (retryErr) {
           // Keep local fallback active while awaiting Atlas whitelist update
         }

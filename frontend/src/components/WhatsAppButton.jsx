@@ -4,23 +4,53 @@ export default function WhatsAppButton() {
   const phoneNumber = '914447982947';
   const message = encodeURIComponent('Hello Lookman Security, I would like to know more about your security solutions.');
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+  const lookmanAiUrl = import.meta.env.VITE_LOOKMAN_AI_URL || '/lookman-ai/index.html';
 
   return (
     <aside
       aria-label="Contact options"
-      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[999] flex items-center justify-end group select-none pointer-events-auto"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[999] flex flex-col items-end gap-3 select-none pointer-events-auto"
     >
+      <a
+        href={lookmanAiUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative flex items-center border-2 border-[#d8b4fe] bg-[#100c24] text-[#d8b4fe] shadow-[0_0_4px_rgba(255,255,255,0.65),0_0_12px_rgba(167,139,250,0.9),0_0_26px_rgba(124,58,237,0.7),inset_0_0_10px_rgba(167,139,250,0.18)] hover:border-white hover:shadow-[0_0_5px_rgba(255,255,255,0.9),0_0_16px_rgba(196,181,253,1),0_0_34px_rgba(124,58,237,0.9),inset_0_0_14px_rgba(167,139,250,0.28)] rounded-full transition-all duration-300 ease-out overflow-hidden h-12 sm:h-14 p-0 focus:outline-none focus:ring-2 focus:ring-[#c4b5fd] focus:ring-offset-2 focus:ring-offset-[#100c24] cursor-pointer"
+        aria-label="Open Lookman AI"
+        title="Open Lookman AI"
+      >
+        <span className="hidden sm:inline max-w-0 opacity-0 group-hover:max-w-[170px] group-hover:opacity-100 group-hover:pl-5 group-hover:pr-2 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden text-[15px] font-bold text-white tracking-wide select-none">
+          Lookman AI
+        </span>
+        <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 relative z-10">
+          <svg
+            viewBox="0 0 24 24"
+            className="w-6 h-6 sm:w-7 sm:h-7 text-white transition-transform duration-300 group-hover:scale-105"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            shapeRendering="geometricPrecision"
+            aria-hidden="true"
+          >
+            <path d="M12 2.5 19 5.2v5.5c0 4.8-2.5 8.3-7 10.8-4.5-2.5-7-6-7-10.8V5.2L12 2.5Z" />
+            <path d="M9.4 8.8 10.5 7.3h3l1.1 1.5" />
+            <rect x="7.5" y="8.8" width="9" height="6.4" rx="1.5" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="15.1" cy="10.6" r=".4" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+      </a>
+
       <a
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative flex items-center bg-[#25D366] hover:bg-[#20ba5a] text-white shadow-[0_8px_30px_rgba(37,211,102,0.45)] hover:shadow-[0_12px_36px_rgba(37,211,102,0.6)] rounded-full transition-all duration-300 ease-out overflow-hidden h-12 sm:h-14 p-0 focus:outline-none focus:ring-4 focus:ring-[#25D366]/40 cursor-pointer"
+        className="group relative flex items-center border-2 border-[#86efac] bg-[#071b13] text-[#86efac] shadow-[0_0_4px_rgba(255,255,255,0.65),0_0_12px_rgba(74,222,128,0.9),0_0_26px_rgba(34,197,94,0.7),inset_0_0_10px_rgba(74,222,128,0.16)] hover:border-white hover:shadow-[0_0_5px_rgba(255,255,255,0.9),0_0_16px_rgba(134,239,172,1),0_0_34px_rgba(34,197,94,0.9),inset_0_0_14px_rgba(74,222,128,0.26)] rounded-full transition-all duration-300 ease-out overflow-hidden h-12 sm:h-14 p-0 focus:outline-none focus:ring-2 focus:ring-[#86efac] focus:ring-offset-2 focus:ring-offset-[#071b13] cursor-pointer"
         aria-label="Chat with us on WhatsApp"
         title="Chat with us on WhatsApp"
       >
-        {/* Subtle breathing background pulse ring centered on the circular button */}
-        <span className="absolute right-0 top-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#25D366] animate-ping opacity-25 pointer-events-none group-hover:hidden" />
-
         {/* 'Chat with us' text smoothly expands on the left of the icon on desktop hover */}
         <span className="hidden sm:inline max-w-0 opacity-0 group-hover:max-w-[170px] group-hover:opacity-100 group-hover:pl-5 group-hover:pr-2 transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden text-[15px] font-bold text-white tracking-wide select-none drop-shadow-xs">
           Chat with us

@@ -1,3 +1,5 @@
+import { API_BASE } from '../api';
+
 /**
  * Dedicated Product Identification & Code Resolver Utility for Lookman CCTV
  * Ensures Camera Name and Product Code are strictly distinct:
@@ -283,6 +285,41 @@ export function downloadProductDatasheet(product) {
   const fileName = product.datasheetPdfName || `${code}_datasheet.pdf`;
   const directUrl = getGoogleDriveDirectDownloadUrl(rawUrl);
 
+  if (rawUrl.startsWith('data:application/pdf;base64,') && product.id) {
+    const saveBlob = blob => {
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    };
+
+    fetch(`${API_BASE}/products/${encodeURIComponent(product.id)}/datasheet`)
+      .then(async response => {
+        if (!response.ok) {
+          const result = await response.json().catch(() => ({}));
+          throw new Error(result.message || `Datasheet download failed (${response.status})`);
+        }
+        return response.blob();
+      })
+      .then(saveBlob)
+      .catch(err => {
+        console.warn('Stored datasheet download failed; using the attached PDF data:', err);
+        try {
+          const base64 = rawUrl.slice(rawUrl.indexOf(',') + 1);
+          const binary = atob(base64);
+          const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+          saveBlob(new Blob([bytes], { type: 'application/pdf' }));
+        } catch (fallbackError) {
+          console.error('Attached PDF download fallback failed:', fallbackError);
+        }
+      });
+    return true;
+  }
+
   try {
     const link = document.createElement('a');
     link.href = directUrl;
@@ -299,4 +336,3 @@ export function downloadProductDatasheet(product) {
     return true;
   }
 }
-

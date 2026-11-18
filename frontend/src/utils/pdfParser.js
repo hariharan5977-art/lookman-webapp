@@ -548,12 +548,13 @@ export async function parsePdfDatasheet(file) {
   const arrayBuffer = await file.arrayBuffer();
 
   // Read base64 data URL for retention & direct viewing
-  const pdfBase64 = await new Promise((resolve) => {
+  const pdfBase64 = await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
-    reader.onerror = () => resolve('');
+    reader.onerror = () => reject(new Error(`Could not read the PDF file "${file.name}".`));
     reader.readAsDataURL(file);
   });
+  if (!pdfBase64) throw new Error(`Could not attach the PDF file "${file.name}".`);
 
   const loadingTask = pdfjsLib.getDocument({
     data: arrayBuffer,
@@ -608,20 +609,18 @@ export async function parsePdfDatasheet(file) {
   };
 
   const findExplicitModel = (lines, defaultName) => {
-    // 1. Check for Color On model code pattern anywhere in the lines
+    // Prefer a labeled model over incidental model-like codes in specifications.
+    const labeledModel = findLabeledModel(lines);
+    if (labeledModel) return labeledModel;
+
+    // Check for Color On model code pattern anywhere in the lines
     for (const line of lines) {
       const coMatch = line.match(/\b(CO-[A-Za-z0-9\-_()]{4,25})\b/i);
       if (coMatch && coMatch[1]) {
         return cleanText(coMatch[1]);
       }
     }
-    // 2. Check for explicit Model: labels
-    for (const line of lines) {
-      const match = line.match(/(?:Model(?:\s*No\.?|\s*Number)?|Item(?:\s*Code)?|Part\s*Number|P\/N|Product\s*Code)\s*[:\-–—]?\s*([A-Za-z0-9\-_/()]+)/i);
-      if (match && match[1]) {
-        return cleanText(match[1]);
-      }
-    }
+
     for (let i = 0; i < Math.min(lines.length, 8); i++) {
       const words = lines[i].split(/\s+/);
       for (const w of words) {
@@ -632,6 +631,14 @@ export async function parsePdfDatasheet(file) {
       return fileNameBase;
     }
     return defaultName;
+  };
+
+  const findLabeledModel = (lines) => {
+    for (const line of lines) {
+      const match = line.match(/(?:Model(?:\s*No\.?|\s*Number)?|Item(?:\s*Code)?|Part\s*Number|P\/N|Product\s*Code)\s*[:\-–—]?\s*([A-Za-z0-9][A-Za-z0-9\-_/()]{2,34})/i);
+      if (match && isModelCode(match[1])) return cleanText(match[1]);
+    }
+    return '';
   };
 
   // Helper to find the prominent "one line of the image / title"
@@ -677,20 +684,30 @@ export async function parsePdfDatasheet(file) {
     return `${model} - ${resolution} ${category} Surveillance Hardware`;
   };
 
-  let hasMultipleDistinctModels = false;
-  const pageModels = pagesData.map((p) => findExplicitModel(p.lines, ''));
+  const pageModels = pagesData.map(p => findLabeledModel(p.lines));
   const uniqueModels = Array.from(new Set(pageModels.filter(Boolean)));
-  if (uniqueModels.length > 1 && uniqueModels.length >= pagesData.length * 0.7) {
-    hasMultipleDistinctModels = true;
-  }
+  const labeledPageCount = pageModels.filter(Boolean).length;
+  const hasMultipleDistinctModels =
+    uniqueModels.length > 1 && labeledPageCount >= pagesData.length * 0.7;
 
   if (hasMultipleDistinctModels) {
-    pagesData.forEach((p, idx) => {
-      const model = pageModels[idx] || `${fileNameBase} - Item ${idx + 1}`;
-      const category = detectCategory(p.fullText, model);
-      const specs = extractSpecsFromLines(p.lines, model);
-      const oneLineTitle = findOneLineTitle(p.lines, model, category, specs.resolution);
-      const imageToUse = p.pageImage || autoDetectProductImage(model, category);
+    const modelPages = new Map();
+    pagesData.forEach((page, idx) => {
+      const model = pageModels[idx];
+      if (!model) return;
+      const key = model.toLowerCase();
+      if (!modelPages.has(key)) modelPages.set(key, { model, pages: [] });
+      modelPages.get(key).pages.push(page);
+    });
+
+    Array.from(modelPages.values()).forEach(({ model, pages }, idx) => {
+      const lines = pages.flatMap(page => page.lines);
+      const fullText = lines.join('\n');
+      const category = detectCategory(fullText, model);
+      const specs = extractSpecsFromLines(lines, model);
+      const oneLineTitle = findOneLineTitle(lines, model, category, specs.resolution);
+      const pageImage = pages.find(page => page.pageImage)?.pageImage || '';
+      const imageToUse = pageImage || autoDetectProductImage(model, category);
       const code = resolveProductCode({ model, title: oneLineTitle, description: specs.description, category });
       const resolvedName = resolveProductName({ model, title: oneLineTitle });
 
@@ -709,9 +726,9 @@ export async function parsePdfDatasheet(file) {
         power: specs.power,
         casing: specs.casing,
         description: specs.description,
-        fullText: p.fullText, // All the text fetched from the page
-        rawImageGiven: p.pageImage ? `Transparent Product PNG (Page ${p.pageNum})` : `Lookman Render (${code})`,
-        imageSource: p.pageImage ? 'pdf_transparent' : 'default_render',
+        fullText,
+        rawImageGiven: pageImage ? `Transparent Product PNG (Page ${pages[0].pageNum})` : `Lookman Render (${code})`,
+        imageSource: pageImage ? 'pdf_transparent' : 'default_render',
         hasImage: Boolean(imageToUse),
         datasheetPdf: pdfBase64,
         datasheetPdfName: file.name,

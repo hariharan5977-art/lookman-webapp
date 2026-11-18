@@ -15,6 +15,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "lookman-app": "file:..",
-    "mongoose": "^9.11.4"
+    "mongoose": "^9.11.4",
+    "serverless-http": "^4.0.0"
   }
 }

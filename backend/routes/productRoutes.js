@@ -64,10 +64,7 @@ router.get('/', async (req, res) => {
       const deletedIds = deletedDocs.map(d => d.identifier.toLowerCase());
       const filtered = mongoProducts.filter(p => {
         const pId = String(p.id || '').toLowerCase();
-        const pModel = String(p.model || '').toLowerCase();
-        const pName = String(p.name || '').toLowerCase();
-        const pSlug = String(p.slug || '').toLowerCase();
-        return !deletedIds.includes(pId) && !deletedIds.includes(pModel) && !deletedIds.includes(pName) && !deletedIds.includes(pSlug);
+        return !deletedIds.includes(pId);
       });
 
       return res.json({
@@ -156,6 +153,55 @@ router.get('/datasheet-download', (req, res) => {
   return res.redirect(302, rawUrl);
 });
 
+// GET /api/products/:id/datasheet - Download the PDF stored with a product
+router.get('/:id/datasheet', async (req, res) => {
+  const param = req.params.id;
+  let product = null;
+
+  if (isMongoConnected()) {
+    try {
+      product = await Product.findOne({
+        $or: [
+          { id: param },
+          { slug: param.toLowerCase() },
+          { model: param }
+        ]
+      }).lean();
+    } catch (err) {
+      console.warn('MongoDB datasheet lookup fallback to local:', err.message);
+    }
+  }
+
+  if (!product) {
+    const db = readDb();
+    product = (db.products || []).find(p =>
+      p.id === param ||
+      p.slug === param.toLowerCase() ||
+      p.model === param
+    );
+  }
+
+  if (!product || !product.datasheetPdf) {
+    return res.status(404).json({ success: false, message: 'Product datasheet not found' });
+  }
+
+  const dataUriMatch = String(product.datasheetPdf).match(
+    /^data:application\/pdf;base64,([A-Za-z0-9+/]+={0,2})$/
+  );
+  const pdfBase64 = dataUriMatch ? dataUriMatch[1] : String(product.datasheetPdf);
+  const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+  if (pdfBuffer.length < 5 || pdfBuffer.toString('ascii', 0, 5) !== '%PDF-') {
+    return res.status(422).json({ success: false, message: 'Stored datasheet is not a valid PDF' });
+  }
+
+  const fileName = path.basename(product.datasheetPdfName || `${product.model || product.id}_datasheet.pdf`)
+    .replace(/[\r\n"]/g, '_');
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  res.setHeader('Content-Length', pdfBuffer.length);
+  return res.send(pdfBuffer);
+});
+
 // GET /api/products/:id - Single product by ID or Slug
 router.get('/:id', async (req, res) => {
   const param = req.params.id;
@@ -229,7 +275,7 @@ router.post('/', async (req, res) => {
       // Remove from tombstone
       await DeletedItem.deleteMany({
         type: 'product',
-        identifier: { $in: [pId.toLowerCase(), modelCode.toLowerCase(), name.toLowerCase()] }
+        identifier: pId.toLowerCase()
       });
     } catch (err) {
       console.warn('MongoDB create product note:', err.message);
@@ -240,7 +286,7 @@ router.post('/', async (req, res) => {
   const db = readDb();
   db.products = db.products || [];
   db.deletedProductIds = db.deletedProductIds || [];
-  const ident = [pId.toLowerCase(), name.toLowerCase(), modelCode.toLowerCase()];
+  const ident = [pId.toLowerCase()];
   db.deletedProductIds = db.deletedProductIds.filter(d => !ident.includes(String(d).toLowerCase()));
   db.products.unshift(newProduct);
   writeDb(db);
@@ -299,11 +345,7 @@ router.post('/bulk', async (req, res) => {
       for (const p of normalizedList) {
         await Product.findOneAndUpdate({ id: p.id }, p, { upsert: true });
       }
-      const idsToClear = normalizedList.flatMap(p => [
-        p.id.toLowerCase(),
-        (p.model || '').toLowerCase(),
-        (p.name || '').toLowerCase()
-      ]);
+      const idsToClear = normalizedList.map(p => p.id.toLowerCase());
       await DeletedItem.deleteMany({ type: 'product', identifier: { $in: idsToClear } });
     } catch (err) {
       console.warn('MongoDB bulk import note:', err.message);
@@ -314,19 +356,16 @@ router.post('/bulk', async (req, res) => {
   const db = readDb();
   db.products = db.products || [];
   db.deletedProductIds = db.deletedProductIds || [];
-  const importedIdentifiers = new Set(
-    normalizedList.flatMap(p => [String(p.id).toLowerCase(), (p.name || '').toLowerCase(), (p.model || '').toLowerCase()])
-  );
+  const importedIdentifiers = new Set(normalizedList.map(p => String(p.id).toLowerCase()));
   db.deletedProductIds = db.deletedProductIds.filter(d => !importedIdentifiers.has(String(d).toLowerCase()));
 
   if (mode === 'replace') {
     db.products = normalizedList;
   } else {
     normalizedList.forEach(np => {
-      const existingIdx = db.products.findIndex(ep => 
-        (ep.name || '').toLowerCase() === np.name.toLowerCase() || 
-        (ep.model || '').toLowerCase() === np.model.toLowerCase() ||
-        String(ep.id) === String(np.id)
+      const existingIdx = db.products.findIndex(ep =>
+        String(ep.id) === String(np.id) ||
+        (mode !== 'append' && (ep.name || '').toLowerCase() === np.name.toLowerCase())
       );
       if (existingIdx >= 0) {
         db.products[existingIdx] = { ...db.products[existingIdx], ...np };
@@ -438,6 +477,12 @@ router.delete('/:id', async (req, res) => {
         ]
       }).lean();
 
+      const aliasesToClear = toDelete.flatMap(p => [
+        p.model,
+        p.name,
+        p.slug
+      ]).filter(Boolean).map(value => String(value).toLowerCase());
+
       await Product.deleteMany({
         $or: [
           { id: param },
@@ -447,13 +492,14 @@ router.delete('/:id', async (req, res) => {
         ]
       });
 
-      const idsToAdd = [param, paramLower];
-      toDelete.forEach(p => {
-        if (p.id) idsToAdd.push(String(p.id).toLowerCase());
-        if (p.model) idsToAdd.push(p.model.toLowerCase());
-        if (p.name) idsToAdd.push(p.name.toLowerCase());
-        if (p.slug) idsToAdd.push(p.slug.toLowerCase());
-      });
+      if (aliasesToClear.length > 0) {
+        await DeletedItem.deleteMany({
+          type: 'product',
+          identifier: { $in: aliasesToClear }
+        });
+      }
+
+      const idsToAdd = toDelete.map(p => String(p.id || '').toLowerCase()).filter(Boolean);
 
       for (const idStr of [...new Set(idsToAdd)]) {
         await DeletedItem.findOneAndUpdate(
@@ -480,6 +526,15 @@ router.delete('/:id', async (req, res) => {
     (p.name && p.name.toLowerCase() === paramLower)
   );
 
+  const aliasesToClear = new Set(matched.flatMap(p => [
+    p.model,
+    p.name,
+    p.slug
+  ]).filter(Boolean).map(value => String(value).toLowerCase()));
+  db.deletedProductIds = db.deletedProductIds.filter(
+    id => !aliasesToClear.has(String(id).toLowerCase())
+  );
+
   db.products = db.products.filter(p => 
     String(p.id) !== param && 
     (!p.slug || p.slug.toLowerCase() !== paramLower) && 
@@ -487,15 +542,9 @@ router.delete('/:id', async (req, res) => {
     (!p.name || p.name.toLowerCase() !== paramLower)
   );
 
-  const idsToAdd = [param, paramLower];
-  matched.forEach(p => {
-    if (p.id) idsToAdd.push(String(p.id).toLowerCase());
-    if (p.model) idsToAdd.push(p.model.toLowerCase());
-    if (p.name) idsToAdd.push(p.name.toLowerCase());
-    if (p.slug) idsToAdd.push(p.slug.toLowerCase());
-  });
+  const idsToAdd = matched.map(p => String(p.id || '').toLowerCase()).filter(Boolean);
 
-  idsToAdd.forEach(item => {
+  [...new Set(idsToAdd)].forEach(item => {
     if (item && !db.deletedProductIds.includes(item)) {
       db.deletedProductIds.push(item);
     }

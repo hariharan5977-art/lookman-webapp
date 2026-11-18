@@ -297,11 +297,11 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/products`);
       const data = await res.json();
+      if (data.success && Array.isArray(data.deletedProductIds)) {
+        backendDeleted = data.deletedProductIds;
+      }
       if (data.success && data.products && data.products.length > 0) {
         prods = data.products;
-        if (data.deletedProductIds && Array.isArray(data.deletedProductIds)) {
-          backendDeleted = data.deletedProductIds;
-        }
       }
     } catch (err) {
       // Backend offline on Netlify
@@ -335,8 +335,19 @@ export default function App() {
     }
 
     // Merge backend deleted list and local deleted list permanently
-    const localDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
-    let allDeleted = [...new Set([...localDeleted, ...backendDeleted])].filter(Boolean);
+    const builtInIds = new Set(ALL_LOOKMAN_PRODUCTS.map(p => String(p.id || '').toLowerCase().trim()));
+    const storedLocalDeleted = JSON.parse(localStorage.getItem('lookman_deleted_product_ids') || '[]');
+    const localDeleted = storedLocalDeleted.filter(id =>
+      String(id || '').startsWith('builtin:') ||
+      !builtInIds.has(String(id || '').toLowerCase().trim())
+    );
+    if (localDeleted.length !== storedLocalDeleted.length) {
+      localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(localDeleted));
+    }
+    const effectiveBackendDeleted = backendDeleted.filter(
+      id => !builtInIds.has(String(id || '').toLowerCase().trim())
+    );
+    let allDeleted = [...new Set([...localDeleted, ...effectiveBackendDeleted])].filter(Boolean);
 
     // If backend returned active products, purge any stale tombstones
     if (prods && prods.length > 0) {
@@ -378,34 +389,38 @@ export default function App() {
       localStorage.setItem('lookman_deleted_product_ids', JSON.stringify(allDeleted));
     }
 
-    // Combine custom products and base products (custom products always first on top)
+    // Combine custom, backend, and built-in products (custom products always first).
     const combined = [...cleanedCustom];
+    const hasProduct = (product) => {
+      const productId = String(product.id || '').toLowerCase().trim();
+      return combined.some(existing =>
+        productId && String(existing.id || '').toLowerCase().trim() === productId
+      );
+    };
 
     // Merge backend products from MongoDB / db.json
     const activeBackendProds = prods.filter(p => !isSecuraSerial(p) && !isObsoleteSample(p));
     activeBackendProds.forEach(bp => {
-      const bpModel = (bp.model || bp.productCode || bp.name || '').toLowerCase().trim();
-      const bpId = String(bp.id || '');
-      const already = combined.some(cp => 
-        (bpId && String(cp.id) === bpId) || 
-        (bpModel && (cp.model || cp.productCode || '').toLowerCase().trim() === bpModel) || 
-        (bpModel && (cp.name || '').toLowerCase().trim() === bpModel)
-      );
-      if (!already) {
-        combined.push(bp);
-      }
+      if (!hasProduct(bp)) combined.push(bp);
     });
 
-    // If combined is empty, fallback to ALL_LOOKMAN_PRODUCTS baseline
-    if (combined.length === 0) {
-      ALL_LOOKMAN_PRODUCTS.forEach(bp => {
-        if (!isSecuraSerial(bp) && !isObsoleteSample(bp)) {
-          combined.push(bp);
-        }
+    // Built-in products remain available alongside additions, unless deleted.
+    const deletedKeys = new Set(allDeleted.map(value => String(value || '').toLowerCase().trim()));
+    ALL_LOOKMAN_PRODUCTS
+      .filter(bp => !isSecuraSerial(bp) && !isObsoleteSample(bp))
+      .forEach(bp => {
+        if (!hasProduct(bp)) combined.push(bp);
       });
-    }
 
-    const normalized = combined.map(p => {
+    const visibleProducts = combined.filter(product => {
+      const keys = [product.id || product.model || product.productCode || product.slug || product.name]
+        .map(value => String(value || '').toLowerCase().trim())
+        .filter(Boolean);
+      const isBuiltIn = builtInIds.has(String(product.id || '').toLowerCase().trim());
+      return !keys.some(key => deletedKeys.has(key) || (isBuiltIn && deletedKeys.has(`builtin:${key}`)));
+    });
+
+    const normalized = visibleProducts.map(p => {
       const code = resolveProductCode(p);
       const name = resolveProductName(p);
       return {

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lookman AI - Dedicated Conversational Intelligence</title>
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%220%22%20%22100%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- Left Sidebar (ChatGPT / Grok Style) -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <span>Lookman AI</span>
+      </div>
+    </div>
+
+    <!-- New Chat Trigger -->
+    <button class="new-chat-btn" onclick="createNewSession()">
+      <span>+ New Chat</span>
+      <span style="font-size:11px; color:#64748b;">Ctrl K</span>
+    </button>
+
+    <div class="sidebar-section-title">Recent Conversations</div>
+    <div class="chat-history" id="chat-history-list">
+      <!-- Populated dynamically by chat.js -->
+    </div>
+
+    <!-- CCTV Engineering Tools -->
+    <div class="sidebar-tools">
+      <div class="sidebar-section-title" style="padding:4px 0 6px 0;">Specialized Tools</div>
+      <button class="tool-link" onclick="openStorageModal()">
+        <span>💾</span> Storage & Bandwidth Sizer
+      </button>
+      <button class="tool-link" onclick="openDoriModal()">
+        <span>🎯</span> DORI Distance Estimator
+      </button>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="user-avatar">L</div>
+      <div style="flex:1; overflow:hidden;">
+        <div style="font-weight:600; font-size:12px; color:#fff;">Lookman Security</div>
+        <div style="font-size:10px; color:#64748b;">Enterprise Workspace</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Chat Workspace -->
+  <main class="main-workspace">
+
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+      <div class="model-selector-wrapper">
+        <select class="model-select" id="model-select">
+          <option value="lookman-1.0-ultra">🛡️ Lookman AI 1.0 Ultra (Flagship Security AI)</option>
+          <option value="lookman-1.0-vision">👁️ Lookman AI 1.0 Vision (Multimodal CCTV Inspector)</option>
+          <option value="lookman-1.0-code">💻 Lookman AI Code & Vision Engineer</option>
+        </select>
+      </div>
+
+      <div class="top-bar-actions">
+        <span class="status-badge">AI CORE ONLINE</span>
+        <button class="action-icon-btn" onclick="createNewSession()" title="Start New Session">⟳</button>
+      </div>
+    </header>
+
+    <!-- Messages Container -->
+    <section class="messages-container" id="messages-container">
+      <!-- Populated dynamically by chat.js -->
+    </section>
+
+    <!-- Bottom Input Dock -->
+    <footer class="bottom-dock">
+      <div class="input-box-wrapper">
+        
+        <!-- Attached Image Preview Bar -->
+        <div class="attachment-preview" id="attachment-preview">
+          <img id="attachment-thumb" src="" alt="Thumbnail">
+          <span>CCTV Snapshot Attached</span>
+          <button class="remove-attachment-btn" onclick="clearAttachment()">✕</button>
+        </div>
+
+        <div class="input-row">
+          <!-- File / CCTV Frame Attachment -->
+          <input type="file" id="image-upload-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+          <button class="action-icon-btn" onclick="document.getElementById('image-upload-input').click()" title="Attach CCTV Snapshot / Image">
+            📷
+          </button>
+
+          <!-- Main Input Field -->
+          <textarea id="chat-input-field" rows="1" placeholder="Message Lookman AI (e.g., 'Calculate storage for 32 cameras', or attach a CCTV snapshot)..."></textarea>
+
+          <!-- Send Button -->
+          <div class="input-actions">
+            <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send Message">
+              ➔
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer-text">
+        Lookman AI is an independent, dedicated AI foundation system for CCTV engineering, video analytics, and physical security.
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- Storage Calculator Modal -->
+  <div class="modal-overlay" id="storage-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">💾 CCTV Storage & Bandwidth Sizer</div>
+        <button class="modal-close" onclick="closeModal('storage-modal')">✕</button>
+      </div>
+      <div class="calc-form-group">
+        <label class="calc-label">Total Number of Cameras</label>
+        <input type="number" id="calc-cams" class="calc-input" value="32">
+      </div>
+      <div class="calc-form-group">
+        <label class="calc-label">Retention Period (Days)</label>
+        <input type="number" id="calc-days" class="calc-input" value="30">
+      </div>
+      <div class="calc-form-group">
+        <label class="calc-label">Resolution</label>
+        <select id="calc-res" class="calc-input">
+          <option value="1080p">1080p Full HD (2MP)</option>
+          <option value="4MP" selected>4MP Quad HD (1440p)</option>
+          <option value="4K">4K Ultra HD (8MP)</option>
+        </select>
+      </div>
+      <div class="calc-form-group">
+        <label class="calc-label">Compression Codec</label>
+        <select id="calc-codec" class="calc-input">
+          <option value="H.265+" selected>H.265+ (Smart Codec)</option>
+          <option value="H.265">H.265 / HEVC</option>
+          <option value="H.264">H.264 / AVC</option>
+        </select>
+      </div>
+      <button class="calc-btn" onclick="runStorageCalculator()">CALCULATE STORAGE</button>
+      <div class="calc-result-box" id="calc-result"></div>
+    </div>
+  </div>
+
+  <!-- DORI Modal -->
+  <div class="modal-overlay" id="dori-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">🎯 DORI Standard Distance Estimator</div>
+        <button class="modal-close" onclick="closeModal('dori-modal')">✕</button>
+      </div>
+      <div style="font-size:12px; color:#94a3b8; line-height:1.6; margin-bottom:14px;">
+        According to <strong>EN 62676-4</strong>, DORI levels are based on Pixels Per Meter (PPM):
+        <br><br>
+        • <strong>Detection (25 PPM)</strong>: ~40–60m (4mm lens)<br>
+        • <strong>Observation (62 PPM)</strong>: ~18–25m<br>
+        • <strong>Recognition (125 PPM)</strong>: ~9–12m<br>
+        • <strong>Identification (250 PPM)</strong>: ~4–6m (Court-admissible face recognition)
+      </div>
+      <button class="calc-btn" onclick="usePrompt('Calculate exact DORI distances for an 8mm lens on a 1/2.8 4MP sensor'); closeModal('dori-modal');">
+        Ask Lookman AI in Chat
+      </button>
+    </div>
+  </div>
+
+  <script src="js/chat.js"></script>
+</body>
+</html>

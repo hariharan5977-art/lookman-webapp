@@ -30,3 +30,6 @@ qa_artifacts/
 assets_archive/
 
 
+
+# Local Netlify folder
+.netlify

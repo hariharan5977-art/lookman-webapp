@@ -34,4 +34,4 @@ COPY --from=builder /app/frontend/dist ./frontend/dist
 
 EXPOSE 5000
 
-CMD ["npm", "start"]
+CMD ["node", "backend/server.js"]
