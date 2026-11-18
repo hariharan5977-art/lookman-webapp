@@ -16,7 +16,6 @@
     "@svg-maps/india": "^2.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "jszip": "^3.10.2",
-    "lookman-app": "file:..",
     "lucide-react": "^1.33.0",
     "pdfjs-dist": "^6.4.299",
     "pngjs": "^7.0.0",
