@@ -9,7 +9,7 @@ router.get('/health', (req, res) => {
   res.json({
     status: 'ONLINE',
     system: 'Lookman AI Dedicated Intelligence Core',
-    version: '1.0.0',
+    version: '2.6.0',
     mode: lookmanModel.apiKey ? 'CLOUD_NEURAL_ACTIVE' : 'SOVEREIGN_STANDALONE',
     timestamp: new Date().toISOString()
   });
@@ -18,10 +18,11 @@ router.get('/health', (req, res) => {
 router.get('/models', (req, res) => {
   res.json({
     object: 'list',
-    data: lookmanModel.getAvailableModels().map(model => ({
+    data: lookmanModel.getAvailableModels().map((model) => ({
       id: model.id,
       object: 'model',
       owned_by: 'lookman-technologies',
+      name: model.name,
       description: model.description,
       capabilities: model.capabilities
     }))
@@ -37,6 +38,14 @@ router.post('/chat/stream', async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  if (typeof res.flushHeaders === 'function') res.flushHeaders();
+
+  let clientClosed = false;
+  res.on('close', () => {
+    if (!res.writableEnded) {
+      clientClosed = true;
+    }
+  });
 
   try {
     for await (const { chunk, provider } of lookmanModel.streamResponse({
@@ -44,14 +53,19 @@ router.post('/chat/stream', async (req, res) => {
       model,
       imageBase64
     })) {
+      if (clientClosed) break;
       res.write(`data: ${JSON.stringify({ chunk, provider, done: false })}\n\n`);
     }
-    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-    res.end();
+    if (!clientClosed && !res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      res.end();
+    }
   } catch (error) {
     console.error('[Lookman AI] Streaming error:', error);
-    res.write(`data: ${JSON.stringify({ error: error.message, done: true })}\n\n`);
-    res.end();
+    if (!clientClosed && !res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ error: error.message, done: true })}\n\n`);
+      res.end();
+    }
   }
 });
 

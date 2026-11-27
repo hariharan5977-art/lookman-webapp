@@ -1,7 +1,10 @@
 /**
- * Lookman AI - Conversational UI Client Logic (ChatGPT / Grok / Gemini Experience)
- * Features real-time SSE token streaming, markdown rendering, image analysis, and session storage.
+ * Lookman AI - Frontend Conversational Controller (Hosted Lookman Web App)
+ * Handles SSE streaming, mobile drawer UX, session persistence, markdown rendering,
+ * multimodal snapshot uploads, and CCTV calculators.
  */
+
+const API_BASE = '/api/lookman-ai';
 
 const state = {
   activeSessionId: null,
@@ -15,8 +18,63 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSessions();
   setupEventListeners();
   autoResizeTextarea();
+  syncHealthStatus();
 });
 
+/* ==========================================================================
+   MOBILE SIDEBAR DRAWER & STATUS SYNC
+   ========================================================================== */
+function openSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  if (sidebar && sidebar.classList) sidebar.classList.add('open');
+  if (backdrop && backdrop.classList) backdrop.classList.add('visible');
+  if (menuBtn && typeof menuBtn.setAttribute === 'function') menuBtn.setAttribute('aria-expanded', 'true');
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  if (sidebar && sidebar.classList) sidebar.classList.remove('open');
+  if (backdrop && backdrop.classList) backdrop.classList.remove('visible');
+  if (menuBtn && typeof menuBtn.setAttribute === 'function') menuBtn.setAttribute('aria-expanded', 'false');
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && sidebar.classList && sidebar.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
+async function syncHealthStatus() {
+  if (typeof fetch !== 'function') return;
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const badge = document.getElementById('status-badge');
+    const badgeText = typeof document.querySelector === 'function'
+      ? document.querySelector('#status-badge .status-text')
+      : null;
+    if (badgeText) {
+      badgeText.textContent = data.mode === 'CLOUD_NEURAL_ACTIVE' ? 'CLOUD NEURAL' : 'AI CORE ONLINE';
+    }
+    if (badge) {
+      badge.title = `${data.system || 'Lookman AI'} (v${data.version || '1.0'})`;
+    }
+  } catch {
+    // Keep default online indicator
+  }
+}
+
+/* ==========================================================================
+   SESSION MANAGEMENT (LOCAL STORAGE)
+   ========================================================================== */
 function loadSessions() {
   try {
     const raw = localStorage.getItem('lookman_ai_sessions');
@@ -63,11 +121,12 @@ function switchSession(sessionId) {
   }
   renderHistoryList();
   renderActiveChat();
+  closeSidebar();
 }
 
 function deleteSession(sessionId, e) {
   if (e) e.stopPropagation();
-  state.sessions = state.sessions.filter(s => s.id !== sessionId);
+  state.sessions = state.sessions.filter((s) => s.id !== sessionId);
   if (state.sessions.length === 0) {
     createNewSession();
   } else if (state.activeSessionId === sessionId) {
@@ -78,21 +137,25 @@ function deleteSession(sessionId, e) {
 }
 
 function getActiveSession() {
-  return state.sessions.find(s => s.id === state.activeSessionId);
+  return state.sessions.find((s) => s.id === state.activeSessionId);
 }
 
 function renderHistoryList() {
   const container = document.getElementById('chat-history-list');
   if (!container) return;
 
-  container.innerHTML = state.sessions.map(s => `
+  container.innerHTML = state.sessions
+    .map(
+      (s) => `
     <div class="history-item ${s.id === state.activeSessionId ? 'active' : ''}" data-session-id="${escapeHtml(String(s.id))}">
-      <span style="overflow:hidden; text-overflow:ellipsis;">💬 ${escapeHtml(s.title)}</span>
-      <button type="button" style="background:none; border:none; color:#64748b; cursor:pointer;" title="Delete">✕</button>
+      <span class="history-item-title">💬 ${escapeHtml(s.title)}</span>
+      <button type="button" class="history-delete-btn" title="Delete conversation" aria-label="Delete conversation">✕</button>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 
-  container.onclick = event => {
+  container.onclick = (event) => {
     const item = event.target.closest('[data-session-id]');
     if (!item) return;
 
@@ -104,13 +167,15 @@ function renderHistoryList() {
   };
 }
 
+/* ==========================================================================
+   CHAT RENDERING & SSE STREAMING
+   ========================================================================== */
 function renderActiveChat() {
   const session = getActiveSession();
   const container = document.getElementById('messages-container');
   if (!session || !container) return;
 
   if (session.messages.length === 0) {
-    // Show Hero View
     container.innerHTML = `
       <div class="hero-view">
         <div class="hero-logo">🛡️</div>
@@ -120,18 +185,18 @@ function renderActiveChat() {
         </div>
         <div class="prompt-suggestions">
           <div class="prompt-card" onclick="usePrompt('Calculate storage and bandwidth for 32 4MP cameras on H.265 for 30 days retention')">
-            <div class="prompt-card-title">📊 CCTV Storage & Bandwidth Sizing</div>
+            <div class="prompt-card-title">📊 CCTV Storage &amp; Bandwidth Sizing</div>
             <div class="prompt-card-sub">Calculates total TB, daily GB, RAID tier, and switch capacity</div>
           </div>
           <div class="prompt-card" onclick="usePrompt('Diagnose RTSP stream dropouts and latency issues across high-definition IP cameras')">
-            <div class="prompt-card-title">📡 RTSP & Stream Diagnostics</div>
+            <div class="prompt-card-title">📡 RTSP &amp; Stream Diagnostics</div>
             <div class="prompt-card-sub">Fix packet loss, TCP vs UDP transport, and GOP intervals</div>
           </div>
           <div class="prompt-card" onclick="usePrompt('Write a Python script using OpenCV and YOLOv8 to detect people in an RTSP feed')">
             <div class="prompt-card-title">🐍 Real-time OpenCV / YOLO Script</div>
             <div class="prompt-card-sub">Multi-threaded video pipeline for low-latency detection</div>
           </div>
-          <div class="prompt-card" onclick="usePrompt('Explain DORI standard distances for a 4mm lens on a 1/2.8 sensor')">
+          <div class="prompt-card" onclick="usePrompt('Explain DORI standard distances for a 4mm lens on a 1/2.8 4MP sensor')">
             <div class="prompt-card-title">🎯 DORI Lens Distance Analysis</div>
             <div class="prompt-card-sub">Detection, Observation, Recognition, Identification distances</div>
           </div>
@@ -141,23 +206,28 @@ function renderActiveChat() {
     return;
   }
 
-  container.innerHTML = session.messages.map(m => renderMessageRow(m)).join('');
+  container.innerHTML = session.messages.map((m) => renderMessageRow(m)).join('');
   container.scrollTop = container.scrollHeight;
 }
 
 function renderMessageRow(msg) {
   const isUser = msg.role === 'user';
   const role = isUser ? 'user' : 'assistant';
-  const avatar = isUser ? '<div class="msg-avatar user-av">👤</div>' : '<div class="msg-avatar ai-av">🛡️</div>';
-  const imageBase64 = typeof msg.imageBase64 === 'string' && msg.imageBase64.startsWith('data:image/')
-    ? escapeHtml(msg.imageBase64)
-    : '';
-  const imgHtml = imageBase64 ? `
+  const avatar = isUser
+    ? '<div class="msg-avatar user-av">👤</div>'
+    : '<div class="msg-avatar ai-av">🛡️</div>';
+  const imageBase64 =
+    typeof msg.imageBase64 === 'string' && msg.imageBase64.startsWith('data:image/')
+      ? escapeHtml(msg.imageBase64)
+      : '';
+  const imgHtml = imageBase64
+    ? `
     <div class="image-preview-badge">
       <img src="${imageBase64}" alt="CCTV Snapshot">
       <span>Attached CCTV Frame for Vision Audit</span>
     </div>
-  ` : '';
+  `
+    : '';
 
   return `
     <div class="message-row ${role}">
@@ -184,30 +254,31 @@ async function sendMessage() {
   const session = getActiveSession();
   if (!session) return;
 
-  // Add User Message
   const userMsg = {
     role: 'user',
-    content: text || (imageBase64 ? 'Please analyze this CCTV visual frame for security threats and objects.' : ''),
-    imageBase64: imageBase64,
+    content:
+      text ||
+      (imageBase64
+        ? 'Please analyze this CCTV visual frame for security threats and objects.'
+        : ''),
+    imageBase64,
     timestamp: Date.now()
   };
   session.messages.push(userMsg);
 
-  // Update session title if first message
   if (session.messages.length === 1) {
-    session.title = (text || 'CCTV Snapshot Audit').slice(0, 32);
+    session.title = (text || 'CCTV Snapshot Audit').slice(0, 34);
   }
 
-  // Clear input
   inputEl.value = '';
   inputEl.style.height = 'auto';
   clearAttachment();
   renderActiveChat();
 
   state.isGenerating = true;
-  document.getElementById('send-btn').disabled = true;
+  const sendBtn = document.getElementById('send-btn');
+  if (sendBtn) sendBtn.disabled = true;
 
-  // Prepare Assistant Placeholder
   const assistantMsg = {
     role: 'assistant',
     content: '',
@@ -215,20 +286,20 @@ async function sendMessage() {
   };
   session.messages.push(assistantMsg);
 
-  // Render container with empty assistant bubble
   renderActiveChat();
   const container = document.getElementById('messages-container');
   const messageRows = container.querySelectorAll('.message-row.assistant');
   const targetContentEl = messageRows[messageRows.length - 1].querySelector('.msg-content');
+  targetContentEl.innerHTML = '<span class="streaming-cursor"></span>';
 
   try {
     const payload = {
-      messages: session.messages.slice(0, -1),
+      messages: session.messages.slice(0, -1).map(({ role, content }) => ({ role, content })),
       model: state.activeModel,
-      imageBase64: imageBase64
+      imageBase64
     };
 
-    const res = await fetch('/api/lookman-ai/chat/stream', {
+    const res = await fetch(`${API_BASE}/chat/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -245,14 +316,15 @@ async function sendMessage() {
     const decoder = new TextDecoder();
     let accumulatedText = '';
     let pendingLine = '';
-    const processLine = line => {
-      if (!line.startsWith('data: ')) return;
 
+    const processLine = (line) => {
+      if (!line.startsWith('data: ')) return;
       const data = JSON.parse(line.slice(6));
       if (data.chunk) {
         accumulatedText += data.chunk;
         assistantMsg.content = accumulatedText;
-        targetContentEl.innerHTML = parseMarkdown(accumulatedText);
+        targetContentEl.innerHTML =
+          parseMarkdown(accumulatedText) + '<span class="streaming-cursor"></span>';
         container.scrollTop = container.scrollHeight;
       } else if (data.error) {
         throw new Error(data.error);
@@ -274,18 +346,22 @@ async function sendMessage() {
         break;
       }
     }
+
+    targetContentEl.innerHTML = parseMarkdown(accumulatedText);
   } catch (err) {
-    assistantMsg.content = '⚠️ Connection Error: Failed to receive response from Lookman AI Core: ' + err.message;
+    assistantMsg.content =
+      '⚠️ Connection Error: Failed to receive response from Lookman AI Core: ' + err.message;
     targetContentEl.innerHTML = parseMarkdown(assistantMsg.content);
   } finally {
     state.isGenerating = false;
-    document.getElementById('send-btn').disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
     saveSessions();
   }
 }
 
 function usePrompt(text) {
   const inputEl = document.getElementById('chat-input-field');
+  if (!inputEl) return;
   inputEl.value = text;
   sendMessage();
 }
@@ -299,10 +375,9 @@ function handleImageUpload(e) {
     state.attachmentBase64 = event.target.result;
     const previewEl = document.getElementById('attachment-preview');
     const thumbEl = document.getElementById('attachment-thumb');
-    thumbEl.src = state.attachmentBase64;
-    previewEl.classList.add('show');
+    if (thumbEl) thumbEl.src = state.attachmentBase64;
+    if (previewEl && previewEl.classList) previewEl.classList.add('show');
 
-    // Switch model to Vision automatically
     const modelSelect = document.getElementById('model-select');
     if (modelSelect) {
       modelSelect.value = 'lookman-1.0-vision';
@@ -320,80 +395,178 @@ function handleImageUpload(e) {
 function clearAttachment() {
   state.attachmentBase64 = null;
   const previewEl = document.getElementById('attachment-preview');
-  if (previewEl) previewEl.classList.remove('show');
+  if (previewEl && previewEl.classList) previewEl.classList.remove('show');
   const fileInput = document.getElementById('image-upload-input');
   if (fileInput) fileInput.value = '';
 }
 
-// Markdown Parser Helper
+/* ==========================================================================
+   ROBUST MARKDOWN RENDERER (MOBILE-SAFE TABLES & CODE BLOCKS)
+   ========================================================================== */
+function formatInline(text) {
+  let out = escapeHtml(text);
+  out = out.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+  out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  out = out.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  return out;
+}
+
 function parseMarkdown(md) {
   if (!md) return '';
-  let html = escapeHtml(md);
 
-  // Code blocks: ```lang ... ```
-  html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
-    return `
+  const codeBlocks = [];
+  const tokenized = String(md).replace(/```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g, (match, lang, code) => {
+    const token = `@@CODEBLOCK_${codeBlocks.length}@@`;
+    codeBlocks.push(`
       <div class="code-block-container">
         <div class="code-header">
-          <span>${lang || 'CODE'}</span>
-          <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+          <span>${escapeHtml(lang || 'code')}</span>
+          <button type="button" class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
         </div>
-        <pre><code>${code.trim()}</code></pre>
+        <pre><code>${escapeHtml(code.trim())}</code></pre>
       </div>
-    `;
+    `);
+    return `\n${token}\n`;
   });
 
-  // Inline code: `code`
-  html = html.replace(/`([^`]+)`/g, '<code style="background:#1e293b; color:#00f3ff; padding:2px 5px; border-radius:4px; font-family:monospace; font-size:12px;">$1</code>');
+  const lines = tokenized.split(/\r?\n/);
+  const htmlParts = [];
+  let i = 0;
 
-  // Headers
-  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  while (i < lines.length) {
+    const line = lines[i].trim();
 
-  // Bold & Italic
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    if (!line) {
+      i++;
+      continue;
+    }
 
-  // Markdown Tables
-  html = html.replace(/\|(.+)\|/g, (match) => {
-    const cells = match.split('|').slice(1, -1);
-    const isHeaderDelimiter = cells.every(c => c.trim().match(/^:?-+:?$/));
-    if (isHeaderDelimiter) return '';
-    const tdCells = cells.map(c => `<td>${c.trim()}</td>`).join('');
-    return `<tr>${tdCells}</tr>`;
-  });
-  html = html.replace(/(<tr>.+<\/tr>(\s*<tr>.+<\/tr>)*)/g, '<table>$1</table>');
+    const codeMatch = line.match(/^@@CODEBLOCK_(\d+)@@$/);
+    if (codeMatch) {
+      htmlParts.push(codeBlocks[Number(codeMatch[1])]);
+      i++;
+      continue;
+    }
 
-  // Bullet Lists
-  html = html.replace(/^• (.*$)/gim, '<li>$1</li>');
-  html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
-  html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+    if (line.startsWith('#### ')) {
+      htmlParts.push(`<h4>${formatInline(line.slice(5))}</h4>`);
+      i++;
+      continue;
+    }
+    if (line.startsWith('### ')) {
+      htmlParts.push(`<h3>${formatInline(line.slice(4))}</h3>`);
+      i++;
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      htmlParts.push(`<h2>${formatInline(line.slice(3))}</h2>`);
+      i++;
+      continue;
+    }
+    if (line.startsWith('# ')) {
+      htmlParts.push(`<h1>${formatInline(line.slice(2))}</h1>`);
+      i++;
+      continue;
+    }
 
-  // Paragraphs
-  html = html.replace(/\n\n/g, '<p></p>');
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const tableLines = [];
+      while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+        tableLines.push(lines[i].trim());
+        i++;
+      }
 
-  return html;
+      let thead = '';
+      const tbodyRows = [];
+
+      tableLines.forEach((tLine, idx) => {
+        const cells = tLine
+          .split('|')
+          .slice(1, -1)
+          .map((c) => c.trim());
+        const isDelimiter = cells.every((c) => /^:?-+:?$/.test(c));
+        if (isDelimiter) return;
+
+        if (idx === 0 && tableLines.length > 1) {
+          thead = `<thead><tr>${cells.map((c) => `<th>${formatInline(c)}</th>`).join('')}</tr></thead>`;
+        } else {
+          tbodyRows.push(`<tr>${cells.map((c) => `<td>${formatInline(c)}</td>`).join('')}</tr>`);
+        }
+      });
+
+      htmlParts.push(
+        `<div class="table-wrapper"><table>${thead}<tbody>${tbodyRows.join('')}</tbody></table></div>`
+      );
+      continue;
+    }
+
+    if (/^[-*•]\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^[-*•]\s+/.test(lines[i].trim())) {
+        items.push(`<li>${formatInline(lines[i].trim().replace(/^[-*•]\s+/, ''))}</li>`);
+        i++;
+      }
+      htmlParts.push(`<ul>${items.join('')}</ul>`);
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
+        items.push(`<li>${formatInline(lines[i].trim().replace(/^\d+\.\s+/, ''))}</li>`);
+        i++;
+      }
+      htmlParts.push(`<ol>${items.join('')}</ol>`);
+      continue;
+    }
+
+    const paraLines = [];
+    while (
+      i < lines.length &&
+      lines[i].trim() &&
+      !lines[i].trim().startsWith('#') &&
+      !lines[i].trim().startsWith('|') &&
+      !/^[-*•]\s+/.test(lines[i].trim()) &&
+      !/^\d+\.\s+/.test(lines[i].trim()) &&
+      !/^@@CODEBLOCK_(\d+)@@$/.test(lines[i].trim())
+    ) {
+      paraLines.push(formatInline(lines[i].trim()));
+      i++;
+    }
+    htmlParts.push(`<p>${paraLines.join('<br>')}</p>`);
+  }
+
+  return htmlParts.join('\n');
 }
 
 function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function copyToClipboard(btn) {
   const code = btn.parentElement.nextElementSibling.innerText;
   navigator.clipboard.writeText(code);
   btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy', 2000);
+  setTimeout(() => {
+    btn.textContent = 'Copy';
+  }, 1800);
 }
 
+/* ==========================================================================
+   INPUT & KEYBOARD LISTENERS
+   ========================================================================== */
 function autoResizeTextarea() {
   const textarea = document.getElementById('chat-input-field');
   if (!textarea) return;
 
-  textarea.addEventListener('input', function() {
+  textarea.addEventListener('input', function () {
     this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+    this.style.height = Math.min(this.scrollHeight, 150) + 'px';
   });
 }
 
@@ -419,33 +592,65 @@ function setupEventListeners() {
       }
     });
   }
+
+  if (typeof document.querySelectorAll === 'function') {
+    document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('open');
+        }
+      });
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      createNewSession();
+      closeSidebar();
+    } else if (e.key === 'Escape') {
+      closeSidebar();
+      if (typeof document.querySelectorAll === 'function') {
+        document.querySelectorAll('.modal-overlay.open').forEach((m) => m.classList.remove('open'));
+      }
+    }
+  });
 }
 
-// Modal Dialog Helpers
+/* ==========================================================================
+   CCTV CALCULATOR MODALS (STORAGE & DORI)
+   ========================================================================== */
 function openStorageModal() {
-  document.getElementById('storage-modal').classList.add('open');
+  const el = document.getElementById('storage-modal');
+  if (el && el.classList) el.classList.add('open');
 }
+
 function openDoriModal() {
-  document.getElementById('dori-modal').classList.add('open');
+  const el = document.getElementById('dori-modal');
+  if (el && el.classList) el.classList.add('open');
 }
+
 function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
+  const el = document.getElementById(id);
+  if (el && el.classList) el.classList.remove('open');
 }
 
 async function runStorageCalculator() {
-  const cameras = parseInt(document.getElementById('calc-cams').value) || 16;
-  const days = parseInt(document.getElementById('calc-days').value) || 30;
+  const cameras = parseInt(document.getElementById('calc-cams').value, 10) || 16;
+  const days = parseInt(document.getElementById('calc-days').value, 10) || 30;
   const resolution = document.getElementById('calc-res').value;
   const codec = document.getElementById('calc-codec').value;
+  const fpsEl = document.getElementById('calc-fps');
+  const fps = fpsEl ? parseInt(fpsEl.value, 10) || 25 : 25;
   const box = document.getElementById('calc-result');
   box.style.display = 'block';
   box.textContent = 'Calculating storage...';
 
   try {
-    const res = await fetch('/api/lookman-ai/tools/calculate-storage', {
+    const res = await fetch(`${API_BASE}/tools/calculate-storage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cameras, days, resolution, codec })
+      body: JSON.stringify({ cameras, days, resolution, codec, fps })
     });
     if (!res.ok) {
       throw new Error(`Lookman AI returned HTTP ${res.status}`);
@@ -453,24 +658,73 @@ async function runStorageCalculator() {
     const data = await res.json();
     const r = data.result;
     box.innerHTML = `
-      <strong>Storage Estimation:</strong><br>
-      • Total Storage: <span style="color:#00f3ff; font-weight:700;">${r.totalStorageTB} TB</span><br>
+      <strong>Storage &amp; Bandwidth Estimate:</strong><br>
+      • Total Storage (${r.days} days): <span style="color:#00f3ff; font-weight:700;">${r.totalStorageTB} TB</span><br>
       • Daily Ingestion: ${r.dailyStorageGB} GB/day<br>
-      • Total Bandwidth: ${r.totalBandwidthMbps} Mbps<br>
-      • Recommended Array: ${r.recommendedRAID}
+      • Total Bandwidth: ${r.totalBandwidthMbps} Mbps (${r.perCameraBitrateMbps} Mbps/cam)<br>
+      • Recommended RAID: ${r.recommendedRAID}
     `;
   } catch (error) {
     box.textContent = `Storage calculation failed: ${error.message}`;
   }
 }
 
+async function runDoriCalculator() {
+  const focalLengthMm = parseFloat(document.getElementById('dori-focal').value) || 4.0;
+  const sensorType = document.getElementById('dori-sensor').value;
+  const resolutionWidth = parseInt(document.getElementById('dori-width').value, 10) || 2560;
+  const box = document.getElementById('dori-result');
+  box.style.display = 'block';
+  box.textContent = 'Calculating DORI distances...';
+
+  try {
+    const res = await fetch(`${API_BASE}/tools/calculate-dori`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ focalLengthMm, sensorType, resolutionWidth })
+    });
+    if (!res.ok) {
+      throw new Error(`Lookman AI returned HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const d = data.result.distances || data.result;
+    box.innerHTML = `
+      <strong>EN 62676-4 DORI Distances (${focalLengthMm}mm, ${escapeHtml(sensorType)}"):</strong><br>
+      • <strong>Detection (25 PPM):</strong> <span style="color:#00f3ff;">${d.Detection.distanceMeters} m</span> (${d.Detection.distanceFeet} ft)<br>
+      • <strong>Observation (62 PPM):</strong> <span style="color:#00f3ff;">${d.Observation.distanceMeters} m</span> (${d.Observation.distanceFeet} ft)<br>
+      • <strong>Recognition (125 PPM):</strong> <span style="color:#00f3ff;">${d.Recognition.distanceMeters} m</span> (${d.Recognition.distanceFeet} ft)<br>
+      • <strong>Identification (250 PPM):</strong> <span style="color:#00f3ff;">${d.Identification.distanceMeters} m</span> (${d.Identification.distanceFeet} ft)
+    `;
+  } catch (error) {
+    box.textContent = `DORI calculation failed: ${error.message}`;
+  }
+}
+
+function askDoriInChat() {
+  const focal = document.getElementById('dori-focal').value || '4.0';
+  const sensor = document.getElementById('dori-sensor').value || '1/2.8';
+  const widthVal = document.getElementById('dori-width').value || '2560';
+  const resName = widthVal === '3840' ? '4K' : widthVal === '2560' ? '4MP' : '1080p';
+  closeModal('dori-modal');
+  usePrompt(`Calculate exact DORI distances for a ${focal}mm lens on a ${sensor} ${resName} sensor`);
+}
+
 Object.assign(window, {
+  openSidebar,
+  closeSidebar,
+  toggleSidebar,
+  createNewSession,
+  switchSession,
+  deleteSession,
+  sendMessage,
+  clearAttachment,
   usePrompt,
   handleImageUpload,
   copyToClipboard,
   openStorageModal,
   openDoriModal,
   closeModal,
-  runStorageCalculator
+  runStorageCalculator,
+  runDoriCalculator,
+  askDoriInChat
 });
-
